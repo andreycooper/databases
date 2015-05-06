@@ -1,4 +1,17 @@
 <resources>
     <string name="app_name">Databases</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_add_book">Add Book</string>
+    <string name="title_activity_add_book">Add Book</string>
+
+    <string name="label_text_empty">There are no books in library</string>
+    <string name="label_button_add_book">Add Book</string>
+
+    <string name="label_button_confirm_add_book">OK</string>
+    <string name="label_button_cancel_add_book">Cancel</string>
+
+    <string name="label_dialog_add_cover_title">Choose cover:</string>
+    <string name="label_dialog_add_book_choice_camera">Take Photo</string>
+    <string name="label_dialog_add_book_choice_gallery">Choose from Library</string>
+
+
 </resources>
