@@ -29,6 +29,7 @@
             android:id="@+id/confirm_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:onClick="onOkButtonClick"
             android:layout_weight="1"
             android:text="@string/label_button_confirm_add_book"/>
     </LinearLayout>
@@ -103,7 +104,7 @@
             android:layout_height="@dimen/image_add_book_cover_height"
             android:layout_weight="7"
             android:onClick="onCoverImageViewClick"
-            android:src="@mipmap/ic_launcher"/>
+            android:src="@drawable/ic_book"/>
     </LinearLayout>
 
     <LinearLayout

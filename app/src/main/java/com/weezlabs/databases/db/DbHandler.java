@@ -46,15 +46,17 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
     }
 
     @Override
-    public void addBook(Book book) {
+    public long addBook(Book book) {
+        long rowId;
         SQLiteDatabase db = this.getWritableDatabase();
-        db.insert(Book.TABLE, null, new Book.ValuesBuilder()
+        rowId = db.insert(Book.TABLE, null, new Book.ValuesBuilder()
                 .author(book.getAuthor())
                 .title(book.getTitle())
                 .coverPath(book.getCoverPath())
                 .descriptuon(book.getDescription())
                 .build());
         db.close();
+        return rowId;
     }
 
     @Override

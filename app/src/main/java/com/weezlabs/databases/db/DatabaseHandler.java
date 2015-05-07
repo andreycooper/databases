@@ -8,7 +8,7 @@ import java.util.List;
  * Created by Andrey Bondarenko on 06.05.15.
  */
 public interface DatabaseHandler {
-    void addBook(Book book);
+    long addBook(Book book);
 
     Book getBook(int id);
 

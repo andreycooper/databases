@@ -25,6 +25,13 @@ public class Book implements Parcelable {
     public Book() {
     }
 
+    public Book(String author, String title, String coverPath, String description) {
+        mAuthor = author;
+        mTitle = title;
+        mCoverPath = coverPath;
+        mDescription = description;
+    }
+
     private Book(Parcel in) {
         this.mId = in.readInt();
         this.mAuthor = in.readString();

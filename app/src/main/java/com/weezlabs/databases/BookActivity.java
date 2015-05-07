@@ -4,29 +4,43 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+import com.weezlabs.databases.model.Book;
+import com.weezlabs.databases.task.InsertOrUpdateBookTask;
 import com.weezlabs.databases.util.ImageUtil;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 
-public class AddBookActivity extends AppCompatActivity {
+public class BookActivity extends AppCompatActivity {
 
     public static final int REQUEST_CAMERA_CODE = 0;
     public static final int REQUEST_GALLERY_CODE = 1;
-    private static final String LOG_TAG = AddBookActivity.class.getSimpleName();
+    private static final String LOG_TAG = BookActivity.class.getSimpleName();
+    public static final String BOOK_KEY = "com.weezlabs.databases.BOOK";
 
     private ImageView mCoverImageView;
+    private EditText mAuthorEditText;
+    private EditText mTitleEditText;
+    private EditText mDescriptionEditText;
+
+    private Book mBook;
+    private Bitmap mCoverBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +53,31 @@ public class AddBookActivity extends AppCompatActivity {
             getSupportActionBar().setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         }
 
+        Bundle extra = getIntent().getExtras();
+        if (extra != null) {
+            mBook = extra.getParcelable(BOOK_KEY);
+        }
+
+        mAuthorEditText = (EditText) findViewById(R.id.author_edit);
+        mTitleEditText = (EditText) findViewById(R.id.title_edit);
+        mDescriptionEditText = (EditText) findViewById(R.id.description_edit);
         mCoverImageView = (ImageView) findViewById(R.id.cover_image);
+
+        if (mBook != null) {
+            setTitle(getString(R.string.label_title_activity_edit_book));
+            fillViews(mBook);
+        }
+    }
+
+    private void fillViews(Book book) {
+        mAuthorEditText.setText(book.getAuthor());
+        mTitleEditText.setText(book.getTitle());
+        Picasso.with(this)
+                .load(book.getCoverPath())
+                .placeholder(R.drawable.ic_book)
+                .error(R.drawable.ic_book)
+                .into(mCoverImageView);
+        mDescriptionEditText.setText(book.getDescription());
     }
 
     @Override
@@ -49,13 +87,14 @@ public class AddBookActivity extends AppCompatActivity {
             switch (requestCode) {
                 case REQUEST_CAMERA_CODE:
                     Bundle extras = data.getExtras();
-                    Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    mCoverImageView.setImageBitmap(imageBitmap);
+                    mCoverBitmap = (Bitmap) extras.get("data");
+                    mCoverImageView.setImageBitmap(mCoverBitmap);
                     break;
                 case REQUEST_GALLERY_CODE:
                     Uri imageUri = data.getData();
                     try {
-                        mCoverImageView.setImageBitmap(ImageUtil.getThumbnail(getApplicationContext(), imageUri));
+                        mCoverBitmap = ImageUtil.getThumbnail(getApplicationContext(), imageUri);
+                        mCoverImageView.setImageBitmap(mCoverBitmap);
                     } catch (IOException e) {
                         e.printStackTrace();
                         Log.e(LOG_TAG, "Can't load cover!");
@@ -69,6 +108,49 @@ public class AddBookActivity extends AppCompatActivity {
 
     public void onCancelButtonClick(View view) {
         onBackPressed();
+    }
+
+    public void onOkButtonClick(View view) {
+        String author = mAuthorEditText.getText().toString();
+        String title = mTitleEditText.getText().toString();
+        if (TextUtils.isEmpty(author)) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.toast_author_empty),
+                    Toast.LENGTH_SHORT).show();
+        } else if (TextUtils.isEmpty(title)) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.toast_title_empty),
+                    Toast.LENGTH_SHORT).show();
+        } else {
+            String description = TextUtils.isEmpty(mDescriptionEditText.getText().toString())
+                    ? null : mDescriptionEditText.getText().toString();
+            String coverPath = null;
+            try {
+                if (mCoverBitmap != null) {
+                    coverPath = ImageUtil.saveBitmapToFile(author, title, mCoverBitmap);
+                }
+            } catch (FileNotFoundException e) {
+                // TODO: maybe alert the user?
+                Log.d(LOG_TAG, "File not found: " + e.getMessage());
+            } catch (IOException e) {
+                // TODO: maybe alert the user?
+                Log.d(LOG_TAG, "Error accessing file: " + e.getMessage());
+            }
+            if (mBook == null) {
+                mBook = new Book(author, title, coverPath, description);
+                InsertOrUpdateBookTask insertBookTask = new InsertOrUpdateBookTask(this, false);
+                insertBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mBook);
+            } else {
+                mBook.setAuthor(author);
+                mBook.setTitle(title);
+                mBook.setCoverPath(coverPath);
+                mBook.setDescription(description);
+                InsertOrUpdateBookTask updateBookTask = new InsertOrUpdateBookTask(this, true);
+                updateBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mBook);
+            }
+            // TODO: maybe setResult() to RESULT_OK before finish?
+            finish();
+        }
     }
 
     public void onCoverImageViewClick(View view) {
@@ -103,7 +185,7 @@ public class AddBookActivity extends AppCompatActivity {
             startActivityForResult(pickPhotoIntent, REQUEST_GALLERY_CODE);
         } else {
             Toast.makeText(getApplicationContext(),
-                    "Can't open app for choose cover!",
+                    getString(R.string.toast_gallery_error),
                     Toast.LENGTH_SHORT).show();
         }
     }
@@ -114,7 +196,7 @@ public class AddBookActivity extends AppCompatActivity {
             startActivityForResult(takePictureIntent, REQUEST_CAMERA_CODE);
         } else {
             Toast.makeText(getApplicationContext(),
-                    "Can't start camera app!",
+                    getString(R.string.toast_camera_error),
                     Toast.LENGTH_SHORT).show();
         }
     }
@@ -135,4 +217,5 @@ public class AddBookActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
