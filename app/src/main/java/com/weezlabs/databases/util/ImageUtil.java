@@ -41,8 +41,8 @@ public class ImageUtil {
         int originalSize = (onlyBoundsOptions.outHeight > onlyBoundsOptions.outWidth)
                 ? onlyBoundsOptions.outHeight : onlyBoundsOptions.outWidth;
 
-        double ratio = (originalSize > context.getResources().getDimension(R.dimen.image_add_book_cover_height))
-                ? (originalSize / context.getResources().getDimension(R.dimen.image_add_book_cover_height)) : 1.0;
+        double ratio = (originalSize > context.getResources().getDimension(R.dimen.image_book_cover_height))
+                ? (originalSize / context.getResources().getDimension(R.dimen.image_book_cover_height)) : 1.0;
 
         BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
         bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio);

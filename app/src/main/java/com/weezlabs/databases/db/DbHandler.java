@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.weezlabs.databases.model.Book;
+import com.weezlabs.databases.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +27,36 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
             Book.DESCRIPTION + " TEXT" +
             ")";
 
+    private static final String CREATE_TABLE_USERS = "" +
+            "CREATE TABLE " + User.TABLE + "(" +
+            User.ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            User.USER_NAME + " TEXT" +
+            ")";
+
+    private static final String CREATE_TABLE_USER_BOOK_LINKS = "" +
+            "CREATE TABLE " + UserBookLink.TABLE + "(" +
+            UserBookLink.ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            UserBookLink.USER_ID + " INTEGER NOT NULL," +
+            UserBookLink.BOOK_ID + " INTEGER NOT NULL," +
+            ")";
+
     private static final String UPGRADE_TABLE_BOOKS = "" +
             "DROP TABLE IF EXISTS " + Book.TABLE;
-    public static final String SELECT_ALL_BOOKS_QUERY = "SELECT * FROM " + Book.TABLE;
+    private static final String UPGRADE_TABLE_USERS = "" +
+            "DROP TABLE IF EXISTS " + User.TABLE;
+    private static final String UPGRADE_TABLE_USER_BOOK_LINKS = "" +
+            "DROP TABLE IF EXISTS " + UserBookLink.TABLE;
+
+    public interface UserBookLink {
+        String TABLE = "user_book";
+        String ID = "_id";
+        String USER_ID = "user_id";
+        String BOOK_ID = "book_id";
+    }
+
+    public interface Queries {
+        String SELECT_ALL_BOOKS = "SELECT * FROM " + Book.TABLE;
+    }
 
     public DbHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -38,11 +66,15 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_BOOKS);
+        db.execSQL(CREATE_TABLE_USERS);
+        db.execSQL(CREATE_TABLE_USER_BOOK_LINKS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(UPGRADE_TABLE_BOOKS);
+        db.execSQL(UPGRADE_TABLE_USERS);
+        db.execSQL(UPGRADE_TABLE_USER_BOOK_LINKS);
         onCreate(db);
     }
 
@@ -81,7 +113,7 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
         Book book;
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(SELECT_ALL_BOOKS_QUERY, null);
+        Cursor cursor = db.rawQuery(Queries.SELECT_ALL_BOOKS, null);
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 book = getBookFromCursor(cursor);
@@ -94,10 +126,8 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
 
     @Override
     public Cursor getAllBooksCursor() {
-
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(SELECT_ALL_BOOKS_QUERY, null);
-        return cursor;
+        return db.rawQuery(Queries.SELECT_ALL_BOOKS, null);
     }
 
     @Override
@@ -130,6 +160,12 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
     @Override
     public void deleteAll() {
 
+    }
+
+    @Override
+    public Cursor getUsersWhoTakeBook(Book bookId) {
+        // TODO: implement select from users table using links table
+        return null;
     }
 
     private void closeCursor(Cursor cursor) {

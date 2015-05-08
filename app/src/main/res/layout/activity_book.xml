@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:padding="@dimen/layout_add_book_confirm_padding">
+        android:padding="@dimen/layout_book_confirm_padding">
 
 
         <Button
@@ -29,8 +29,8 @@
             android:id="@+id/confirm_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:onClick="onOkButtonClick"
             android:layout_weight="1"
+            android:onClick="onOkButtonClick"
             android:text="@string/label_button_confirm_add_book"/>
     </LinearLayout>
 
@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:orientation="horizontal"
-        android:padding="@dimen/layout_add_book_section_padding"
+        android:padding="@dimen/layout_book_section_padding"
         android:weightSum="10">
 
         <TextView
@@ -48,7 +48,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:text="Title:"/>
+            android:text="@string/label_book_title"/>
 
         <EditText
             android:id="@+id/title_edit"
@@ -64,7 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/title_layout"
         android:orientation="horizontal"
-        android:padding="@dimen/layout_add_book_section_padding"
+        android:padding="@dimen/layout_book_section_padding"
         android:weightSum="10">
 
         <TextView
@@ -72,7 +72,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:text="Author:"/>
+            android:text="@string/label_book_author"/>
 
         <EditText
             android:id="@+id/author_edit"
@@ -88,7 +88,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/author_layout"
         android:orientation="horizontal"
-        android:padding="@dimen/layout_add_book_section_padding"
+        android:padding="@dimen/layout_book_section_padding"
         android:weightSum="10">
 
         <TextView
@@ -96,25 +96,50 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:text="Cover:"/>
+            android:text="@string/label_book_cover"/>
 
         <ImageView
             android:id="@+id/cover_image"
             android:layout_width="0dp"
-            android:layout_height="@dimen/image_add_book_cover_height"
+            android:layout_height="@dimen/image_book_cover_height"
             android:layout_weight="7"
             android:onClick="onCoverImageViewClick"
             android:src="@drawable/ic_book"/>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/description_layout"
+        android:id="@+id/total_amount_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/confirm_layout"
+        android:padding="@dimen/layout_book_section_padding"
+        android:weightSum="10">
+
+        <TextView
+            android:id="@+id/total_amount_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="@string/label_book_total_amount"/>
+
+        <EditText
+            android:id="@+id/total_amount_edit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="7"
+            android:digits="0123456789"
+            android:inputType="numberDecimal"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/description_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/total_amount_layout"
         android:layout_below="@id/cover_layout"
         android:orientation="horizontal"
-        android:padding="@dimen/layout_add_book_section_padding"
+        android:padding="@dimen/layout_book_section_padding"
         android:weightSum="10">
 
         <TextView
@@ -122,7 +147,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:text="Description:"/>
+            android:text="@string/label_book_description"/>
 
         <EditText
             android:id="@+id/description_edit"
@@ -130,6 +155,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="7"/>
     </LinearLayout>
+
 
 
 </RelativeLayout>

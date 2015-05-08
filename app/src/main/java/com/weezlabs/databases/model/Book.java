@@ -15,12 +15,14 @@ public class Book implements Parcelable {
     public static final String TITLE = "title";
     public static final String COVER_PATH = "cover_path";
     public static final String DESCRIPTION = "description";
+    public static final String TOTAL_AMOUNT = "total_amount";
 
     private int mId;
     private String mAuthor;
     private String mTitle;
     private String mCoverPath;
     private String mDescription;
+    private int mTotalAmount;
 
     public Book() {
     }
@@ -32,12 +34,13 @@ public class Book implements Parcelable {
         mDescription = description;
     }
 
-    private Book(Parcel in) {
-        this.mId = in.readInt();
-        this.mAuthor = in.readString();
-        this.mTitle = in.readString();
-        this.mCoverPath = in.readString();
-        this.mDescription = in.readString();
+    public Book(int id, String author, String title, String coverPath, String description, int totalAmount) {
+        mId = id;
+        mAuthor = author;
+        mTitle = title;
+        mCoverPath = coverPath;
+        mDescription = description;
+        mTotalAmount = totalAmount;
     }
 
     public int getId() {
@@ -80,6 +83,14 @@ public class Book implements Parcelable {
         mDescription = description;
     }
 
+    public int getTotalAmount() {
+        return mTotalAmount;
+    }
+
+    public void setTotalAmount(int totalAmount) {
+        mTotalAmount = totalAmount;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Book{");
@@ -88,6 +99,7 @@ public class Book implements Parcelable {
         sb.append(", mTitle='").append(mTitle).append('\'');
         sb.append(", mCoverPath='").append(mCoverPath).append('\'');
         sb.append(", mDescription='").append(mDescription).append('\'');
+        sb.append(", mTotalAmount=").append(mTotalAmount);
         sb.append('}');
         return sb.toString();
     }
@@ -104,9 +116,19 @@ public class Book implements Parcelable {
         dest.writeString(this.mTitle);
         dest.writeString(this.mCoverPath);
         dest.writeString(this.mDescription);
+        dest.writeInt(this.mTotalAmount);
     }
 
-    public static final Parcelable.Creator<Book> CREATOR = new Parcelable.Creator<Book>() {
+    private Book(Parcel in) {
+        this.mId = in.readInt();
+        this.mAuthor = in.readString();
+        this.mTitle = in.readString();
+        this.mCoverPath = in.readString();
+        this.mDescription = in.readString();
+        this.mTotalAmount = in.readInt();
+    }
+
+    public static final Creator<Book> CREATOR = new Creator<Book>() {
         public Book createFromParcel(Parcel source) {
             return new Book(source);
         }
@@ -141,6 +163,11 @@ public class Book implements Parcelable {
 
         public ValuesBuilder descriptuon(String description) {
             values.put(DESCRIPTION, description);
+            return this;
+        }
+
+        public ValuesBuilder totalAmount(int totalAmount) {
+            values.put(TOTAL_AMOUNT, totalAmount);
             return this;
         }
 

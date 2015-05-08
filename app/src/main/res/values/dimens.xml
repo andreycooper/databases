@@ -3,14 +3,14 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="text_add_book_labels_size">16sp</dimen>
-    <dimen name="image_add_book_cover_height">120dp</dimen>
-    <dimen name="button_add_book_min_width">150dp</dimen>
-    <dimen name="layout_add_book_confirm_padding">20dp</dimen>
-    <dimen name="layout_add_book_section_padding">6dp</dimen>
+    <dimen name="text_book_labels_size">16sp</dimen>
+    <dimen name="image_book_cover_height">120dp</dimen>
+    <dimen name="button_book_min_width">150dp</dimen>
+    <dimen name="layout_book_confirm_padding">16dp</dimen>
+    <dimen name="layout_book_section_padding">4dp</dimen>
 
-    <dimen name="text_empty_padding">20dp</dimen>
-    <dimen name="text_empty_size">16sp</dimen>
+    <dimen name="text_empty_list_padding">20dp</dimen>
+    <dimen name="text_empty_list_size">16sp</dimen>
 
     <dimen name="book_row_padding">6dp</dimen>
     <dimen name="book_row_text_view_padding">4dp</dimen>

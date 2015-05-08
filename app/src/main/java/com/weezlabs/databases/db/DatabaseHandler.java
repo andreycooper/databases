@@ -25,4 +25,7 @@ public interface DatabaseHandler {
     int deleteBook(Book book);
 
     void deleteAll();
+
+    Cursor getUsersWhoTakeBook(Book bookId);
+
 }
