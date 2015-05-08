@@ -1,60 +1,98 @@
 package com.weezlabs.databases;
 
 import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ExpandableListView;
+import android.widget.ListView;
+import android.widget.PopupMenu;
 
+import com.weezlabs.databases.db.DbHandler;
 import com.weezlabs.databases.model.Book;
+import com.weezlabs.databases.task.DeleteBookTask;
+import com.weezlabs.databases.task.OnTaskCompletedListener;
 
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<SparseArray<Book>> {
-    private static final int BOOK_LIST_LOADER = 15052015;
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
+        OnTaskCompletedListener {
+    private static final int BOOKS_LOADER = 15052015;
+    private static final int REQUEST_BOOK_ACTIVITY = 113;
 
-    private SparseArray<Book> mBookArray = new SparseArray<>();
-    private ExpandableBookAdapter mExpandableBookAdapter;
-    private ExpandableListView mBooksListView;
+    private BookCursorAdapter mBookCursorAdapter;
+    private ListView mBooksListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mBooksListView = (ExpandableListView) findViewById(R.id.books_listview);
-        mExpandableBookAdapter = new ExpandableBookAdapter(this, mBookArray);
-        mBooksListView.setAdapter(mExpandableBookAdapter);
-        registerForContextMenu(mBooksListView);
-        mBooksListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mBookCursorAdapter = new BookCursorAdapter(this, null, true);
+
+        mBooksListView = (ListView) findViewById(R.id.books_listview);
+        mBooksListView.setEmptyView(findViewById(R.id.empty_view));
+        mBooksListView.setAdapter(mBookCursorAdapter);
+
+        mBooksListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                return false;
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int bookId = mBookCursorAdapter.getBook(position).getId();
+                mBookCursorAdapter.setDescriptionOpened(bookId);
+
+                BookCursorAdapter.ViewHolder holder = (BookCursorAdapter.ViewHolder) view.getTag();
+                mBookCursorAdapter.setDescriptionVisibility(holder, bookId);
             }
         });
 
-//
-//
-//        View emptyView = getLayoutInflater().inflate(R.layout.empty_list_view, null);
-//        addContentView(emptyView,
-//                new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-//                        RelativeLayout.LayoutParams.MATCH_PARENT));
-        loadBookList();
+        final OnTaskCompletedListener taskCompletedListener = this;
+
+        mBooksListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final Book book = mBookCursorAdapter.getBook(position);
+                PopupMenu popupMenu = new PopupMenu(getApplicationContext(), view);
+                popupMenu.getMenuInflater().inflate(R.menu.menu_book_context, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int id = item.getItemId();
+                        switch (id) {
+                            case R.id.action_edit_book:
+                                startAddBookActivity(book);
+                                break;
+                            case R.id.action_delete_book:
+                                DeleteBookTask deleteBookTask =
+                                        new DeleteBookTask(getApplicationContext(), taskCompletedListener);
+                                deleteBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, book);
+                                break;
+                            default:
+                                break;
+                        }
+                        return true;
+                    }
+                });
+                popupMenu.show();
+                return true;
+            }
+        });
+
+        getLoaderManager().initLoader(BOOKS_LOADER, null, this);
     }
 
     @Override
-    protected void onResume() {
-//        loadBookList();
-        super.onResume();
-    }
-
-    public void onAddBookClick(View view) {
-        startAddBookActivity();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_BOOK_ACTIVITY && resultCode == RESULT_OK) {
+            loadBookCursor();
+        }
     }
 
     @Override
@@ -75,6 +113,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return super.onOptionsItemSelected(item);
     }
 
+    public void onAddBookClick(View view) {
+        startAddBookActivity();
+    }
+
     private void startAddBookActivity() {
         startAddBookActivity(null);
     }
@@ -85,38 +127,71 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (book != null) {
             intent.putExtra(BookActivity.BOOK_KEY, book);
         }
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_BOOK_ACTIVITY);
     }
 
-    private void loadBookList() {
-        Loader<SparseArray<Book>> loader = getLoaderManager().getLoader(BOOK_LIST_LOADER);
+    private void loadBookCursor() {
+        Loader<Cursor> loader = getLoaderManager().getLoader(BOOKS_LOADER);
         if (loader == null) {
-            loader = getLoaderManager().initLoader(BOOK_LIST_LOADER, null, this);
+            loader = getLoaderManager().initLoader(BOOKS_LOADER, null, this);
         } else {
-            loader = getLoaderManager().restartLoader(BOOK_LIST_LOADER, null, this);
+            loader = getLoaderManager().restartLoader(BOOKS_LOADER, null, this);
         }
         loader.forceLoad();
     }
 
     @Override
-    public Loader<SparseArray<Book>> onCreateLoader(int id, Bundle args) {
-        BookListLoader loader = null;
-        if (id == BOOK_LIST_LOADER) {
-            loader = new BookListLoader(this);
-        }
-        return loader;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<SparseArray<Book>> loader, SparseArray<Book> data) {
-        if (loader.getId() == BOOK_LIST_LOADER) {
-            mBookArray = data;
-            mExpandableBookAdapter.notifyDataSetChanged();
+    public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle) {
+        switch (loaderID) {
+            case BOOKS_LOADER:
+                return new BookCursorLoader(this);
+            default:
+                // An invalid id was passed in
+                return null;
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<SparseArray<Book>> loader) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        switch (loader.getId()) {
+            case BOOKS_LOADER:
+                mBookCursorAdapter.changeCursor(data);
+                break;
+            default:
+                break;
+        }
+    }
 
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        switch (loader.getId()) {
+            case BOOKS_LOADER:
+                mBookCursorAdapter.changeCursor(null);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void onTaskCompleted() {
+        loadBookCursor();
+    }
+
+    /**
+     * Created by Andrey Bondarenko on 08.05.15.
+     */
+    public static class BookCursorLoader extends CursorLoader {
+        DbHandler mDbHandler;
+
+        public BookCursorLoader(Context context) {
+            super(context);
+            mDbHandler = new DbHandler(context);
+        }
+
+        @Override
+        public Cursor loadInBackground() {
+            return mDbHandler.getAllBooksCursor();
+        }
     }
 }

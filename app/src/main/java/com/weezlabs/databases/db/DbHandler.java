@@ -28,6 +28,7 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
 
     private static final String UPGRADE_TABLE_BOOKS = "" +
             "DROP TABLE IF EXISTS " + Book.TABLE;
+    public static final String SELECT_ALL_BOOKS_QUERY = "SELECT * FROM " + Book.TABLE;
 
     public DbHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -78,10 +79,9 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
     public List<Book> getAllBooks() {
         List<Book> bookList = new ArrayList<>();
         Book book;
-        String selectAllQuery = "SELECT * FROM " + Book.TABLE;
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectAllQuery, null);
+        Cursor cursor = db.rawQuery(SELECT_ALL_BOOKS_QUERY, null);
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 book = getBookFromCursor(cursor);
@@ -90,6 +90,14 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
         }
         closeCursor(cursor);
         return bookList;
+    }
+
+    @Override
+    public Cursor getAllBooksCursor() {
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery(SELECT_ALL_BOOKS_QUERY, null);
+        return cursor;
     }
 
     @Override
@@ -130,7 +138,7 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
         }
     }
 
-    private Book getBookFromCursor(Cursor cursor) {
+    public static Book getBookFromCursor(Cursor cursor) {
         Book book = new Book();
         book.setId(cursor.getInt(cursor.getColumnIndex(Book.ID)));
         book.setAuthor(cursor.getString(cursor.getColumnIndex(Book.AUTHOR)));

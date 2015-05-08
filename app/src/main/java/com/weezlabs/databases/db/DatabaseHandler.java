@@ -1,5 +1,7 @@
 package com.weezlabs.databases.db;
 
+import android.database.Cursor;
+
 import com.weezlabs.databases.model.Book;
 
 import java.util.List;
@@ -13,6 +15,8 @@ public interface DatabaseHandler {
     Book getBook(int id);
 
     List<Book> getAllBooks();
+
+    Cursor getAllBooksCursor();
 
     int getBooksCount();
 

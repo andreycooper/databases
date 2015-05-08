@@ -21,7 +21,8 @@
         </activity>
         <activity
             android:name=".BookActivity"
-            android:label="@string/title_activity_add_book">
+            android:label="@string/title_activity_add_book"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

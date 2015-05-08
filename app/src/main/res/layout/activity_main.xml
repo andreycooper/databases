@@ -8,9 +8,37 @@
                 android:paddingTop="@dimen/activity_vertical_margin"
                 tools:context=".MainActivity">
 
-    <ExpandableListView
+    <ListView
         android:id="@+id/books_listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <RelativeLayout
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+
+        <TextView
+            android:id="@+id/empty_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center_horizontal"
+            android:padding="@dimen/text_empty_padding"
+            android:text="@string/label_text_empty"
+            android:textSize="@dimen/text_empty_size"/>
+
+        <Button
+            android:id="@+id/add_book_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/empty_textview"
+            android:layout_centerHorizontal="true"
+            android:minWidth="@dimen/button_add_book_min_width"
+            android:onClick="onAddBookClick"
+            android:text="@string/label_button_add_book"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>

@@ -45,7 +45,7 @@ public class BookActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_book);
+        setContentView(R.layout.activity_book);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -148,7 +148,8 @@ public class BookActivity extends AppCompatActivity {
                 InsertOrUpdateBookTask updateBookTask = new InsertOrUpdateBookTask(this, true);
                 updateBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mBook);
             }
-            // TODO: maybe setResult() to RESULT_OK before finish?
+            Intent resultIntent = new Intent();
+            setResult(RESULT_OK, resultIntent);
             finish();
         }
     }
