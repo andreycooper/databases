@@ -3,7 +3,14 @@
     <string name="action_add_book">Add Book</string>
     <string name="action_edit_book">Edit</string>
     <string name="action_delete_book">Delete</string>
+    <string name="title_activity_main">Personal Library Catalogue</string>
     <string name="title_activity_add_book">Add Book</string>
+
+    <string name="label_book_title">Title:</string>
+    <string name="label_book_author">Author:</string>
+    <string name="label_book_cover">Cover:</string>
+    <string name="label_book_description">Description:</string>
+
 
     <string name="label_text_empty">There are no books in library</string>
     <string name="label_button_add_book">Add Book</string>

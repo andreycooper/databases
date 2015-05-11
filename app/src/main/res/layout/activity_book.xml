@@ -29,8 +29,8 @@
             android:id="@+id/confirm_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:onClick="onOkButtonClick"
             android:layout_weight="1"
+            android:onClick="onOkButtonClick"
             android:text="@string/label_button_confirm_add_book"/>
     </LinearLayout>
 
@@ -48,7 +48,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:text="Title:"/>
+            android:text="@string/label_book_title"/>
 
         <EditText
             android:id="@+id/title_edit"
@@ -72,7 +72,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:text="Author:"/>
+            android:text="@string/label_book_author"/>
 
         <EditText
             android:id="@+id/author_edit"
@@ -96,7 +96,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:text="Cover:"/>
+            android:text="@string/label_book_cover"/>
 
         <ImageView
             android:id="@+id/cover_image"
@@ -122,7 +122,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:text="Description:"/>
+            android:text="@string/label_book_description"/>
 
         <EditText
             android:id="@+id/description_edit"
