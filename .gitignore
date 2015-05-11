@@ -15,6 +15,7 @@ local.properties
 .signing/
  
 # User-specific configurations
+.idea/
 .idea/dictionaries/
 .idea/libraries/
 .idea/workspace.xml

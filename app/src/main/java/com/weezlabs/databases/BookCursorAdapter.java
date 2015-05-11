@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-import com.weezlabs.databases.db.DbHandler;
 import com.weezlabs.databases.model.Book;
 
 /**
@@ -38,7 +37,7 @@ public class BookCursorAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder holder = (ViewHolder) view.getTag();
 
-        final Book book = DbHandler.getBookFromCursor(cursor);
+        final Book book = Book.getBookFromCursor(cursor);
         holder.title.setText(context.getString(R.string.label_book_row_title, book.getTitle()));
         holder.author.setText(context.getString(R.string.label_book_row_author, book.getAuthor()));
         Picasso.with(context)
@@ -66,7 +65,7 @@ public class BookCursorAdapter extends CursorAdapter {
     }
 
     public Book getBook(int clickedPosition) {
-        Book book = DbHandler.getBookFromCursor((Cursor) getItem(clickedPosition));
+        Book book = Book.getBookFromCursor((Cursor) getItem(clickedPosition));
         return book;
     }
 

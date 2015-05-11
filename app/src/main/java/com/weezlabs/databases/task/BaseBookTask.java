@@ -26,6 +26,7 @@ abstract public class BaseBookTask extends AsyncTask<Book, Void, Long> {
     protected void onPostExecute(Long aLong) {
         if (mListener != null) {
             mListener.onTaskCompleted();
+            mListener = null;
         }
     }
 }

@@ -37,7 +37,7 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
             "CREATE TABLE " + UserBookLink.TABLE + "(" +
             UserBookLink.ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             UserBookLink.USER_ID + " INTEGER NOT NULL," +
-            UserBookLink.BOOK_ID + " INTEGER NOT NULL," +
+            UserBookLink.BOOK_ID + " INTEGER NOT NULL" +
             ")";
 
     private static final String UPGRADE_TABLE_BOOKS = "" +
@@ -100,7 +100,7 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
 
         Cursor cursor = db.query(Book.TABLE, columns, Book.ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
-            book = getBookFromCursor(cursor);
+            book = Book.getBookFromCursor(cursor);
         }
         closeCursor(cursor);
 
@@ -116,7 +116,7 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
         Cursor cursor = db.rawQuery(Queries.SELECT_ALL_BOOKS, null);
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                book = getBookFromCursor(cursor);
+                book = Book.getBookFromCursor(cursor);
                 bookList.add(book);
             } while (cursor.moveToNext());
         }
@@ -172,16 +172,6 @@ public class DbHandler extends SQLiteOpenHelper implements DatabaseHandler {
         if (cursor != null) {
             cursor.close();
         }
-    }
-
-    public static Book getBookFromCursor(Cursor cursor) {
-        Book book = new Book();
-        book.setId(cursor.getInt(cursor.getColumnIndex(Book.ID)));
-        book.setAuthor(cursor.getString(cursor.getColumnIndex(Book.AUTHOR)));
-        book.setTitle(cursor.getString(cursor.getColumnIndex(Book.TITLE)));
-        book.setCoverPath(cursor.getString(cursor.getColumnIndex(Book.COVER_PATH)));
-        book.setDescription(cursor.getString(cursor.getColumnIndex(Book.DESCRIPTION)));
-        return book;
     }
 
 }

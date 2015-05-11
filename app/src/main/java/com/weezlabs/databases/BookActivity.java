@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.squareup.leakcanary.RefWatcher;
 import com.squareup.picasso.Picasso;
 import com.weezlabs.databases.model.Book;
 import com.weezlabs.databases.task.InsertOrUpdateBookTask;

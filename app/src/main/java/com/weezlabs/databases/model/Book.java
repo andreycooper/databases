@@ -1,6 +1,7 @@
 package com.weezlabs.databases.model;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -41,6 +42,16 @@ public class Book implements Parcelable {
         mCoverPath = coverPath;
         mDescription = description;
         mTotalAmount = totalAmount;
+    }
+
+    public static Book getBookFromCursor(Cursor cursor) {
+        Book book = new Book();
+        book.setId(cursor.getInt(cursor.getColumnIndex(ID)));
+        book.setAuthor(cursor.getString(cursor.getColumnIndex(AUTHOR)));
+        book.setTitle(cursor.getString(cursor.getColumnIndex(TITLE)));
+        book.setCoverPath(cursor.getString(cursor.getColumnIndex(COVER_PATH)));
+        book.setDescription(cursor.getString(cursor.getColumnIndex(DESCRIPTION)));
+        return book;
     }
 
     public int getId() {
