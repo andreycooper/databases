@@ -47,6 +47,11 @@ public class BookCursorAdapter extends CursorAdapter {
                 .centerInside()
                 .fit()
                 .into(holder.cover);
+
+        holder.totalAmount.setText(context.getString(R.string.label_book_row_total_amount, book.getTotalAmount()));
+        holder.availableAmount.setText(context.getString(R.string.label_book_row_available_amount,
+                cursor.getInt(cursor.getColumnIndex(Book.AMOUNT_ALIAS))));
+
         if (TextUtils.isEmpty(book.getDescription())) {
             holder.description.setText(context.getString(R.string.label_description_text_empty));
         } else {
@@ -65,8 +70,7 @@ public class BookCursorAdapter extends CursorAdapter {
     }
 
     public Book getBook(int clickedPosition) {
-        Book book = Book.getBookFromCursor((Cursor) getItem(clickedPosition));
-        return book;
+        return Book.getBookFromCursor((Cursor) getItem(clickedPosition));
     }
 
     public void setDescriptionOpened(int bookId) {
@@ -91,6 +95,9 @@ public class BookCursorAdapter extends CursorAdapter {
         TextView title;
         TextView author;
         TextView description;
+        TextView totalAmount;
+        TextView availableAmount;
+        View divider;
         View descriptionView;
 
         public ViewHolder(View view) {
@@ -98,6 +105,9 @@ public class BookCursorAdapter extends CursorAdapter {
             title = (TextView) view.findViewById(R.id.title_text_view);
             author = (TextView) view.findViewById(R.id.author_text_view);
             description = (TextView) view.findViewById(R.id.description_text_view);
+            totalAmount = (TextView) view.findViewById(R.id.total_amount_text_view);
+            availableAmount = (TextView) view.findViewById(R.id.available_amount_text_view);
+            divider = view.findViewById(R.id.amount_divider);
             descriptionView = view.findViewById(R.id.description_layout);
         }
     }

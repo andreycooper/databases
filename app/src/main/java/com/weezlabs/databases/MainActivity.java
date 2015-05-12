@@ -1,5 +1,6 @@
 package com.weezlabs.databases;
 
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -13,16 +14,16 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 
-import com.weezlabs.databases.db.DbHandler;
+import com.weezlabs.databases.db.DatabaseHandler;
 import com.weezlabs.databases.model.Book;
 import com.weezlabs.databases.task.DeleteBookTask;
 import com.weezlabs.databases.task.OnTaskCompletedListener;
@@ -45,6 +46,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         mBookCursorAdapter = new BookCursorAdapter(this, null, true);
 
+        initListView();
+
+        getLoaderManager().initLoader(BOOKS_LOADER, null, this);
+
+        initDrawer();
+    }
+
+    private void initListView() {
         ListView booksListView = (ListView) findViewById(R.id.books_listview);
         booksListView.setEmptyView(findViewById(R.id.empty_view));
         booksListView.setAdapter(mBookCursorAdapter);
@@ -60,25 +69,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         });
 
-        final OnTaskCompletedListener taskCompletedListener = this;
-
         booksListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 final Book book = mBookCursorAdapter.getBook(position);
-                PopupMenu popupMenu = new PopupMenu(getApplicationContext(), view);
-                popupMenu.getMenuInflater().inflate(R.menu.menu_book_context, popupMenu.getMenu());
+                PopupMenu popupMenu = new PopupMenu(getActivity(), view, GravityCompat.END);
+                popupMenu.getMenuInflater().inflate(R.menu.menu_book_popup, popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         int id = item.getItemId();
                         switch (id) {
                             case R.id.action_edit_book:
-                                startAddBookActivity(book);
+                                startBookActivity(book);
                                 break;
                             case R.id.action_delete_book:
                                 DeleteBookTask deleteBookTask =
-                                        new DeleteBookTask(getApplicationContext(), taskCompletedListener);
+                                        new DeleteBookTask(getApplicationContext(), getTaskCompletedListener());
                                 deleteBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, book);
                                 break;
                             default:
@@ -91,10 +98,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 return true;
             }
         });
-
-        getLoaderManager().initLoader(BOOKS_LOADER, null, this);
-
-        initDrawer();
     }
 
     private void initDrawer() {
@@ -141,10 +144,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                         break;
                     case 1:
                         mDrawerLayout.closeDrawer(mDrawerPlaceHolder);
+                        startUsersActivity();
                         break;
                     case 2:
-                        startAddBookActivity();
                         mDrawerLayout.closeDrawer(mDrawerPlaceHolder);
+                        startBookActivity();
                         break;
                     default:
                         break;
@@ -152,6 +156,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         });
 
+    }
+
+    private OnTaskCompletedListener getTaskCompletedListener() {
+        return this;
+    }
+
+    private Activity getActivity() {
+        return this;
     }
 
     @Override
@@ -204,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         int id = item.getItemId();
 
         if (id == R.id.action_add_book) {
-            startAddBookActivity();
+            startBookActivity();
             return true;
         }
 
@@ -212,20 +224,25 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     public void onAddBookClick(View view) {
-        startAddBookActivity();
+        startBookActivity();
     }
 
-    private void startAddBookActivity() {
-        startAddBookActivity(null);
+    private void startBookActivity() {
+        startBookActivity(null);
     }
 
 
-    private void startAddBookActivity(Book book) {
+    private void startBookActivity(Book book) {
         Intent intent = new Intent(getApplicationContext(), BookActivity.class);
         if (book != null) {
             intent.putExtra(BookActivity.BOOK_KEY, book);
         }
         startActivityForResult(intent, REQUEST_BOOK_ACTIVITY);
+    }
+
+    private void startUsersActivity() {
+        Intent intent = new Intent(getApplicationContext(), UsersActivity.class);
+        startActivity(intent);
     }
 
     private void loadBookCursor() {
@@ -239,8 +256,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle) {
-        switch (loaderID) {
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+        switch (loaderId) {
             case BOOKS_LOADER:
                 return new BookCursorLoader(this);
             default:
@@ -280,16 +297,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
      * Created by Andrey Bondarenko on 08.05.15.
      */
     public static class BookCursorLoader extends CursorLoader {
-        DbHandler mDbHandler;
+        DatabaseHandler mDatabaseHandler;
 
         public BookCursorLoader(Context context) {
             super(context);
-            mDbHandler = new DbHandler(context);
+            mDatabaseHandler = new DatabaseHandler(context.getApplicationContext());
         }
 
         @Override
         public Cursor loadInBackground() {
-            return mDbHandler.getAllBooksCursor();
+            return mDatabaseHandler.getBooksWithAvailableAmount();
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.weezlabs.databases.model;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+
 /**
  * Created by Andrey Bondarenko on 08.05.15.
  */
@@ -18,6 +21,13 @@ public class User {
     public User(int id, String name) {
         mId = id;
         mName = name;
+    }
+
+    public static User getUserFromCursor(Cursor cursor) {
+        User user = new User();
+        user.setId(cursor.getInt(cursor.getColumnIndex(ID)));
+        user.setName(cursor.getString(cursor.getColumnIndex(USER_NAME)));
+        return user;
     }
 
     public int getId() {
@@ -43,5 +53,23 @@ public class User {
         sb.append(", mName='").append(mName).append('\'');
         sb.append('}');
         return sb.toString();
+    }
+
+    public static final class ValuesBuilder {
+        private final ContentValues values = new ContentValues();
+
+        public ValuesBuilder id(int id) {
+            values.put(ID, id);
+            return this;
+        }
+
+        public ValuesBuilder userName(String userName) {
+            values.put(USER_NAME, userName);
+            return this;
+        }
+
+        public ContentValues build() {
+            return values;
+        }
     }
 }

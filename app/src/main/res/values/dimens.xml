@@ -22,6 +22,9 @@
     <dimen name="book_row_text_size">16sp</dimen>
     <dimen name="book_row_cover_image_right_margin">6dp</dimen>
     <dimen name="book_row_cover_image_size">50dp</dimen>
+    <dimen name="book_row_amount_layout_width">120dp</dimen>
+    <dimen name="book_row_amount_layout_padding">1dp</dimen>
+    <dimen name="book_row_amount_divider_width">1dp</dimen>
 
     <dimen name="description_padding">6dp</dimen>
     <dimen name="description_header_text_size">16sp</dimen>
@@ -31,5 +34,7 @@
     <dimen name="user_row_padding">6dp</dimen>
     <dimen name="user_row_text_view_padding">16dp</dimen>
     <dimen name="user_row_text_size">16sp</dimen>
+
+    <dimen name="dialog_layout_padding">10dp</dimen>
 
 </resources>

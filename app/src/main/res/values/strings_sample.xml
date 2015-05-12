@@ -5,4 +5,8 @@
     <string name="label_description_text_sample">Lorem ipsum dolor sit amet, vel ex euripidis ullamcorper, ferri scripta voluptatibus ad vix, te solum iriure senserit usu. Et eum purto inimicus, nam justo appetere at. Dictas vocent pertinax eum ne, quidam praesent mea an, alii dicunt eam cu. Vix viris congue ex. Eu qui omnium dolores, sea novum praesent ut.\n\nSed legimus vituperata assueverit ei, has volumus hendrerit an. Qui in nihil pertinacia, usu atqui volumus periculis cu. Eu qui vero nostrum, te reque putent repudiare eum, labores honestatis te eos. At solet labore usu, iusto essent at eum. Et ius summo inciderint neglegentur, id sea sale phaedrum euripidis, nemore fuisset propriae vim ei. Quo inani melius alienum an.\n\nQuo an duis iudicabit explicari, usu iriure accumsan ex, ne vis melius nostrud sadipscing. Te ius mutat posse lorem. Cu solum primis ponderum mei, ex mei tale detracto, ex animal electram sapientem eos. Pro nibh munere dissentiunt id. Ei has choro aliquam verterem, eos case melius accumsan id, duo ex semper vidisse.</string>
 
     <string name="label_user_row_name_sample">Username</string>
+    <string name="label_book_row_total_amount_sample">Total: 101</string>
+    <string name="label_book_row_available_amount_sample">Available: 5</string>
+
+
 </resources>

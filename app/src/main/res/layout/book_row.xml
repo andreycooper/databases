@@ -4,6 +4,7 @@
                 android:layout_height="wrap_content"
                 android:padding="@dimen/book_row_padding">
 
+
     <ImageView
         android:id="@+id/cover_image_view"
         android:layout_width="@dimen/book_row_cover_image_size"
@@ -14,28 +15,69 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_book"/>
 
-    <TextView
-        android:id="@+id/title_text_view"
+    <RelativeLayout
+        android:id="@+id/amount_layout"
+        android:layout_width="@dimen/book_row_amount_layout_width"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/cover_image_view"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        >
+
+        <TextView
+            android:id="@+id/total_amount_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:padding="@dimen/book_row_text_view_padding"
+            android:text="@string/label_book_row_total_amount_sample"/>
+
+        <TextView
+            android:id="@+id/available_amount_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/total_amount_text_view"
+            android:padding="@dimen/book_row_text_view_padding"
+            android:text="@string/label_book_row_available_amount_sample"/>
+    </RelativeLayout>
+
+    <!-- TODO: Why divider is hide on device 4.4? -->
+    <View
+        android:id="@+id/amount_divider"
+        android:layout_width="@dimen/book_row_amount_divider_width"
+        android:layout_height="match_parent"
+        android:layout_alignBottom="@id/amount_layout"
+        android:layout_toLeftOf="@id/amount_layout"
+        android:background="@color/color_book_row_amount_divider"/>
+
+    <RelativeLayout
+        android:id="@+id/title_author_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/cover_image_view"
-        android:ellipsize="end"
-        android:padding="@dimen/book_row_text_view_padding"
-        android:singleLine="true"
-        android:text="@string/label_book_row_title_sample"
-        android:textSize="@dimen/book_row_text_size"/>
+        android:layout_toLeftOf="@id/amount_divider"
+        android:layout_toRightOf="@id/cover_image_view">
 
-    <TextView
-        android:id="@+id/author_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/title_text_view"
-        android:layout_toRightOf="@id/cover_image_view"
-        android:ellipsize="end"
-        android:padding="@dimen/book_row_text_view_padding"
-        android:singleLine="true"
-        android:text="@string/label_book_row_author_sample"
-        android:textSize="@dimen/book_row_text_size"/>
+        <TextView
+            android:id="@+id/title_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:padding="@dimen/book_row_text_view_padding"
+            android:singleLine="true"
+            android:text="@string/label_book_row_title_sample"
+            android:textSize="@dimen/book_row_text_size"/>
+
+        <TextView
+            android:id="@+id/author_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title_text_view"
+            android:ellipsize="end"
+            android:padding="@dimen/book_row_text_view_padding"
+            android:singleLine="true"
+            android:text="@string/label_book_row_author_sample"
+            android:textSize="@dimen/book_row_text_size"/>
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/description_layout"

@@ -18,7 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.squareup.leakcanary.RefWatcher;
 import com.squareup.picasso.Picasso;
 import com.weezlabs.databases.model.Book;
 import com.weezlabs.databases.task.InsertOrUpdateBookTask;
@@ -39,6 +38,7 @@ public class BookActivity extends AppCompatActivity {
     private EditText mAuthorEditText;
     private EditText mTitleEditText;
     private EditText mDescriptionEditText;
+    private EditText mTotalAmountEditText;
 
     private Book mBook;
     private Bitmap mCoverBitmap;
@@ -62,6 +62,7 @@ public class BookActivity extends AppCompatActivity {
         mAuthorEditText = (EditText) findViewById(R.id.author_edit);
         mTitleEditText = (EditText) findViewById(R.id.title_edit);
         mDescriptionEditText = (EditText) findViewById(R.id.description_edit);
+        mTotalAmountEditText = (EditText) findViewById(R.id.total_amount_edit);
         mCoverImageView = (ImageView) findViewById(R.id.cover_image);
 
         if (mBook != null) {
@@ -79,6 +80,7 @@ public class BookActivity extends AppCompatActivity {
                 .error(R.drawable.ic_book)
                 .into(mCoverImageView);
         mDescriptionEditText.setText(book.getDescription());
+        mTotalAmountEditText.setText(String.valueOf(book.getTotalAmount()));
     }
 
     @Override
@@ -114,6 +116,7 @@ public class BookActivity extends AppCompatActivity {
     public void onOkButtonClick(View view) {
         String author = mAuthorEditText.getText().toString();
         String title = mTitleEditText.getText().toString();
+        int totalAmount = Integer.parseInt(mTotalAmountEditText.getText().toString());
         if (TextUtils.isEmpty(author)) {
             Toast.makeText(getApplicationContext(),
                     getString(R.string.toast_author_empty),
@@ -138,7 +141,7 @@ public class BookActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "Error accessing file: " + e.getMessage());
             }
             if (mBook == null) {
-                mBook = new Book(author, title, coverPath, description);
+                mBook = new Book(author, title, coverPath, description, totalAmount);
                 InsertOrUpdateBookTask insertBookTask = new InsertOrUpdateBookTask(this, false);
                 insertBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mBook);
             } else {
@@ -146,6 +149,7 @@ public class BookActivity extends AppCompatActivity {
                 mBook.setTitle(title);
                 mBook.setCoverPath(coverPath);
                 mBook.setDescription(description);
+                mBook.setTotalAmount(totalAmount);
                 InsertOrUpdateBookTask updateBookTask = new InsertOrUpdateBookTask(this, true);
                 updateBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mBook);
             }

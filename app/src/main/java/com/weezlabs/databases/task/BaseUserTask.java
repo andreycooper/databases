@@ -3,21 +3,21 @@ package com.weezlabs.databases.task;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.weezlabs.databases.model.Book;
+import com.weezlabs.databases.model.User;
 
 /**
- * Created by Andrey Bondarenko on 07.05.15.
+ * Created by Andrey Bondarenko on 12.05.15.
  */
-abstract public class BaseBookTask extends AsyncTask<Book, Void, Long> {
+abstract public class BaseUserTask extends AsyncTask<User, Void, Long> {
     protected Context mContext;
     protected OnTaskCompletedListener mListener;
 
-    protected BaseBookTask(Context context) {
+    public BaseUserTask(Context context) {
         mContext = context.getApplicationContext();
         mListener = null;
     }
 
-    protected BaseBookTask(Context context, OnTaskCompletedListener listener) {
+    public BaseUserTask(Context context, OnTaskCompletedListener listener) {
         this(context);
         mListener = listener;
     }

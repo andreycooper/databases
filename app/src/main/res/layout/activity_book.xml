@@ -128,7 +128,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="7"
             android:digits="0123456789"
-            android:inputType="numberDecimal"/>
+            android:gravity="right"
+            android:inputType="numberDecimal"
+            android:text="@string/amount_book_default"/>
 
     </LinearLayout>
 
@@ -155,7 +157,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="7"/>
     </LinearLayout>
-
 
 
 </RelativeLayout>

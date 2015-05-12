@@ -2,7 +2,10 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="popupMenuStyle">@style/PopupMenu.AppTheme</item>
+    </style>
 
+    <style name="PopupMenu.AppTheme" parent="Widget.AppCompat.Light.ListPopupWindow">
     </style>
 
 </resources>

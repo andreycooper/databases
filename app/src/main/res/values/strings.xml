@@ -1,12 +1,17 @@
 <resources>
     <string name="app_name">Databases</string>
     <string name="action_add_book">Add Book</string>
-    <string name="action_add_user">Settings</string>
+    <string name="action_add_user">Add User</string>
     <string name="action_edit_book">Edit</string>
     <string name="action_delete_book">Delete</string>
+    <string name="action_give_book">Give book</string>
+    <string name="action_edit_user">Edit</string>
+    <string name="action_delete_user">Delete</string>
+
     <string name="title_activity_main">Books</string>
     <string name="title_activity_users">Users</string>
     <string name="title_activity_add_book">Add Book</string>
+    <string name="title_activity_book_details">Details of Book</string>
 
     <string name="title_section_books">Books</string>
     <string name="title_section_users">Users</string>
@@ -17,6 +22,7 @@
     <string name="label_book_cover">Cover:</string>
     <string name="label_book_description">Description:</string>
     <string name="label_book_total_amount">Total amount:</string>
+    <string name="amount_book_default">1</string>
 
     <string name="label_text_empty">There are no books in library</string>
     <string name="label_text_user_empty">There are no users</string>
@@ -25,6 +31,13 @@
 
     <string name="label_button_confirm_add_book">OK</string>
     <string name="label_button_cancel_add_book">Cancel</string>
+
+    <string name="label_dialog_add_user_title">Input user name:</string>
+    <string name="label_dialog_add_user_ok_button">Add</string>
+    <string name="label_dialog_add_user_cancel_button">Cancel</string>
+    <string name="label_dialog_edit_user_title">Edit user name:</string>
+    <string name="label_dialog_edit_user_ok_button">OK</string>
+    <string name="label_dialog_edit_user_cancel_button">Cancel</string>
 
     <string name="label_dialog_add_cover_title">Choose cover:</string>
     <string name="label_dialog_add_book_choice_camera">Take Photo</string>
@@ -39,14 +52,11 @@
 
     <string name="label_book_row_title">Title: %1$s</string>
     <string name="label_book_row_author">Author: %1$s</string>
+    <string name="label_book_row_total_amount">Total: %1$d</string>
+    <string name="label_book_row_available_amount">Available: %1$d</string>
 
     <string name="label_description_header">Description:</string>
     <string name="label_description_text_empty">No description.</string>
-    <string name="title_activity_drawer">DrawerActivity</string>
-
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

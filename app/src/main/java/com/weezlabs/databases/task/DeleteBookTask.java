@@ -2,7 +2,7 @@ package com.weezlabs.databases.task;
 
 import android.content.Context;
 
-import com.weezlabs.databases.db.DbHandler;
+import com.weezlabs.databases.db.DatabaseHandler;
 import com.weezlabs.databases.model.Book;
 
 /**
@@ -19,7 +19,7 @@ public class DeleteBookTask extends BaseBookTask {
 
     @Override
     protected Long doInBackground(Book... params) {
-        DbHandler dbHandler = new DbHandler(mContext);
-        return Long.valueOf(dbHandler.deleteBook(params[0]));
+        DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
+        return (long) databaseHandler.deleteBook(params[0]);
     }
 }

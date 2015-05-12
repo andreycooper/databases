@@ -3,7 +3,7 @@ package com.weezlabs.databases.task;
 import android.content.Context;
 import android.widget.Toast;
 
-import com.weezlabs.databases.db.DbHandler;
+import com.weezlabs.databases.db.DatabaseHandler;
 import com.weezlabs.databases.model.Book;
 
 /**
@@ -25,11 +25,11 @@ public class InsertOrUpdateBookTask extends BaseBookTask {
 
     @Override
     protected Long doInBackground(Book... params) {
-        DbHandler dbHandler = new DbHandler(mContext);
+        DatabaseHandler databaseHandler = new DatabaseHandler(mContext);
         if (mIsUpdate) {
-            return Long.valueOf(dbHandler.updateBook(params[0]));
+            return (long) databaseHandler.updateBook(params[0]);
         } else {
-            return dbHandler.addBook(params[0]);
+            return databaseHandler.addBook(params[0]);
         }
     }
 

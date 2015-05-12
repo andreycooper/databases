@@ -17,6 +17,7 @@ public class Book implements Parcelable {
     public static final String COVER_PATH = "cover_path";
     public static final String DESCRIPTION = "description";
     public static final String TOTAL_AMOUNT = "total_amount";
+    public static final String AMOUNT_ALIAS = "remain_amount";
 
     private int mId;
     private String mAuthor;
@@ -44,6 +45,11 @@ public class Book implements Parcelable {
         mTotalAmount = totalAmount;
     }
 
+    public Book(String author, String title, String coverPath, String description, int totalAmount) {
+        this(author, title, coverPath, description);
+        mTotalAmount = totalAmount;
+    }
+
     public static Book getBookFromCursor(Cursor cursor) {
         Book book = new Book();
         book.setId(cursor.getInt(cursor.getColumnIndex(ID)));
@@ -51,6 +57,7 @@ public class Book implements Parcelable {
         book.setTitle(cursor.getString(cursor.getColumnIndex(TITLE)));
         book.setCoverPath(cursor.getString(cursor.getColumnIndex(COVER_PATH)));
         book.setDescription(cursor.getString(cursor.getColumnIndex(DESCRIPTION)));
+        book.setTotalAmount(cursor.getInt(cursor.getColumnIndex(TOTAL_AMOUNT)));
         return book;
     }
 
@@ -172,7 +179,7 @@ public class Book implements Parcelable {
             return this;
         }
 
-        public ValuesBuilder descriptuon(String description) {
+        public ValuesBuilder description(String description) {
             values.put(DESCRIPTION, description);
             return this;
         }
