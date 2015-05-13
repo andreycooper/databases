@@ -3,8 +3,8 @@ package com.weezlabs.databases;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -20,21 +20,27 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.weezlabs.databases.db.DatabaseHandler;
+import com.weezlabs.databases.model.Book;
 import com.weezlabs.databases.model.User;
 import com.weezlabs.databases.task.BaseUserTask;
 import com.weezlabs.databases.task.DeleteUserTask;
 import com.weezlabs.databases.task.InsertOrUpdateUserTask;
 import com.weezlabs.databases.task.OnTaskCompletedListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class UsersActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
-        OnTaskCompletedListener, PopupMenu.OnMenuItemClickListener {
+        OnTaskCompletedListener {
     private static final int USERS_LOADER = 18032015;
+    private static final int AVAILABLE_BOOKS_LOADER = 15092010;
+    private static final int INCORRECT_ID = -1;
 
     private UserCursorAdapter mUserCursorAdapter;
+    private User mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +52,7 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        mUserCursorAdapter = new UserCursorAdapter(this, null, true);
+        mUserCursorAdapter = new UserCursorAdapter(this, null, true, R.layout.user_row);
 
         initListView();
 
@@ -70,8 +76,8 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
                         int id = item.getItemId();
                         switch (id) {
                             case R.id.action_give_book:
-                                // TODO: implement give book to user!
-                                Toast.makeText(getApplicationContext(), "TODO: implement give book", Toast.LENGTH_SHORT).show();
+                                mUser = user;
+                                useLoader(AVAILABLE_BOOKS_LOADER);
                                 break;
                             case R.id.action_edit_user:
                                 showAddUserDialog(user);
@@ -109,7 +115,7 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
             showAddUserDialog(null);
             return true;
         } else if (id == android.R.id.home) {
-            onBackPressed();
+            finish();
             return true;
         }
 
@@ -136,9 +142,9 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         if (!isNewUser) {
             materialEdit.setText(user.getName());
             materialEdit.setSelection(user.getName().length());
-            builder.setTitle(getString(R.string.label_dialog_edit_user_title));
+            builder.setTitle(R.string.label_dialog_edit_user_title);
         } else {
-            builder.setTitle(getString(R.string.label_dialog_add_user_title));
+            builder.setTitle(R.string.label_dialog_add_user_title);
         }
 
         builder.setView(inflatedView);
@@ -160,7 +166,7 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
                 dialog.dismiss();
             }
         });
-        builder.setNegativeButton(getString(R.string.label_dialog_add_user_cancel_button), new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.label_dialog_add_user_cancel_button, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -170,16 +176,82 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         builder.create().show();
     }
 
+    private void showChooseBookDialog(final Cursor cursor) {
+        if (mUser == null) {
+            return;
+        }
+        final List<Integer> bookIdList = new ArrayList<>();
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(this, R.style.Base_Theme_AppCompat_Light_Dialog_Alert);
+        builder.setTitle(getString(R.string.label_dialog_give_book_title, mUser.getName()));
+
+        CharSequence[] labels = getLabelsFromCursor(cursor);
+        boolean[] checkedItems = new boolean[labels.length];
+
+        builder.setMultiChoiceItems(labels, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                int bookId = INCORRECT_ID;
+                if (cursor.moveToPosition(which)) {
+                    bookId = cursor.getInt(cursor.getColumnIndex(Book.ID));
+                }
+                if (isChecked && bookId != INCORRECT_ID) {
+                    bookIdList.add(bookId);
+                } else if (bookIdList.contains(bookId) && bookId != INCORRECT_ID) {
+                    bookIdList.remove(Integer.valueOf(bookId));
+                }
+            }
+        });
+
+        builder.setPositiveButton(R.string.label_dialog_give_book_ok_button, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                GiveBooksTask task = new GiveBooksTask(getActivity().getApplicationContext(),
+                        bookIdList, mUser.getId());
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                setResultToOk();
+                dialog.dismiss();
+            }
+        });
+        builder.setNeutralButton(R.string.label_dialog_give_book_cancel_button, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mUser = null;
+                dialog.dismiss();
+            }
+        });
+        builder.setCancelable(false);
+        builder.create().show();
+    }
+
+    private void setResultToOk() {
+        Intent resultIntent = new Intent();
+        setResult(RESULT_OK, resultIntent);
+    }
+
+    private CharSequence[] getLabelsFromCursor(Cursor cursor) {
+        CharSequence[] labels = new CharSequence[cursor.getCount()];
+        int position;
+        if (cursor.moveToFirst()) {
+            do {
+                position = cursor.getPosition();
+                labels[position] = cursor.getString(cursor.getColumnIndex(Book.TITLE));
+            } while (cursor.moveToNext());
+        }
+        return labels;
+    }
+
+
     private void executeUserTask(BaseUserTask userTask, User... params) {
         userTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
     }
 
-    private void loadUserCursor() {
-        Loader<Cursor> loader = getLoaderManager().getLoader(USERS_LOADER);
+    private void useLoader(int loaderId) {
+        Loader<Cursor> loader = getLoaderManager().getLoader(loaderId);
         if (loader == null) {
-            loader = getLoaderManager().initLoader(USERS_LOADER, null, this);
+            loader = getLoaderManager().initLoader(loaderId, null, this);
         } else {
-            loader = getLoaderManager().restartLoader(USERS_LOADER, null, this);
+            loader = getLoaderManager().restartLoader(loaderId, null, this);
         }
         loader.forceLoad();
     }
@@ -189,6 +261,8 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         switch (id) {
             case USERS_LOADER:
                 return new UserCursorLoader(this);
+            case AVAILABLE_BOOKS_LOADER:
+                return new AvailableBookCursorLoader(this);
             default:
                 // An invalid id was passed in
                 return null;
@@ -201,6 +275,9 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
             case USERS_LOADER:
                 mUserCursorAdapter.changeCursor(data);
                 break;
+            case AVAILABLE_BOOKS_LOADER:
+                showChooseBookDialog(data);
+                break;
             default:
                 break;
         }
@@ -212,6 +289,9 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
             case USERS_LOADER:
                 mUserCursorAdapter.changeCursor(null);
                 break;
+            case AVAILABLE_BOOKS_LOADER:
+                mUser = null;
+                break;
             default:
                 break;
         }
@@ -219,25 +299,49 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
 
     @Override
     public void onTaskCompleted() {
-        loadUserCursor();
+        setResultToOk();
+        useLoader(USERS_LOADER);
     }
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        return false;
-    }
-
-    public static class UserCursorLoader extends CursorLoader {
-        DatabaseHandler mDatabaseHandler;
+    private static class UserCursorLoader extends BaseCursorLoader {
 
         public UserCursorLoader(Context context) {
             super(context);
-            mDatabaseHandler = new DatabaseHandler(context.getApplicationContext());
         }
 
         @Override
         public Cursor loadInBackground() {
             return mDatabaseHandler.getUsersCursor();
+        }
+    }
+
+    private static class AvailableBookCursorLoader extends BaseCursorLoader {
+
+        public AvailableBookCursorLoader(Context context) {
+            super(context);
+        }
+
+        @Override
+        public Cursor loadInBackground() {
+            return mDatabaseHandler.getAvailableBooks();
+        }
+    }
+
+    private static class GiveBooksTask extends AsyncTask<Void, Void, Void> {
+        DatabaseHandler mDatabaseHandler;
+        List<Integer> mBookIdList;
+        int mUserId;
+
+        public GiveBooksTask(Context context, List<Integer> bookIdList, int userId) {
+            mDatabaseHandler = new DatabaseHandler(context.getApplicationContext());
+            mBookIdList = bookIdList;
+            mUserId = userId;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mDatabaseHandler.giveBooksToUser(mBookIdList, mUserId);
+            return null;
         }
     }
 }

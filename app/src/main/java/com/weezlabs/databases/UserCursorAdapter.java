@@ -14,13 +14,16 @@ import com.weezlabs.databases.model.User;
  * Created by Andrey Bondarenko on 11.05.15.
  */
 public class UserCursorAdapter extends CursorAdapter {
-    public UserCursorAdapter(Context context, Cursor c, boolean autoRequery) {
+    private int mLayout;
+
+    public UserCursorAdapter(Context context, Cursor c, boolean autoRequery, int rowLayout) {
         super(context, c, autoRequery);
+        mLayout = rowLayout;
     }
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View rowView = LayoutInflater.from(context).inflate(R.layout.user_row, parent, false);
+        View rowView = LayoutInflater.from(context).inflate(mLayout, parent, false);
         ViewHolder holder = new ViewHolder(rowView);
         rowView.setTag(holder);
         return rowView;

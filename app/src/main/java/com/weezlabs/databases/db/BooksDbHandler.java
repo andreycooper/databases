@@ -26,8 +26,6 @@ public interface BooksDbHandler {
 
     void deleteAllBooks();
 
-    Cursor getUsersWhoTakeBook(int bookId);
-
     Cursor getAvailableBooks();
 
     Cursor getBooksWithAvailableAmount();

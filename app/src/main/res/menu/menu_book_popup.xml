@@ -3,6 +3,10 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.weezlabs.databases.BookActivity">
     <item
+        android:id="@+id/action_book_details"
+        android:orderInCategory="0"
+        android:title="@string/action_book_details"/>
+    <item
         android:id="@+id/action_edit_book"
         android:orderInCategory="1"
         android:title="@string/action_edit_book"/>

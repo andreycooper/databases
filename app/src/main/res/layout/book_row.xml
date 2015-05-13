@@ -21,15 +21,16 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/cover_image_view"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        >
+        android:layout_alignParentTop="true">
 
         <TextView
             android:id="@+id/total_amount_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
+            android:ellipsize="marquee"
             android:padding="@dimen/book_row_text_view_padding"
+            android:singleLine="true"
             android:text="@string/label_book_row_total_amount_sample"/>
 
         <TextView
@@ -37,7 +38,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/total_amount_text_view"
+            android:ellipsize="marquee"
             android:padding="@dimen/book_row_text_view_padding"
+            android:singleLine="true"
             android:text="@string/label_book_row_available_amount_sample"/>
     </RelativeLayout>
 
@@ -48,7 +51,7 @@
         android:layout_height="match_parent"
         android:layout_alignBottom="@id/amount_layout"
         android:layout_toLeftOf="@id/amount_layout"
-        android:background="@color/color_book_row_amount_divider"/>
+        android:background="@color/dim_foreground_disabled_material_dark"/>
 
     <RelativeLayout
         android:id="@+id/title_author_layout"

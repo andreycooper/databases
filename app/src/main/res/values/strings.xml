@@ -2,6 +2,7 @@
     <string name="app_name">Databases</string>
     <string name="action_add_book">Add Book</string>
     <string name="action_add_user">Add User</string>
+    <string name="action_book_details">Details</string>
     <string name="action_edit_book">Edit</string>
     <string name="action_delete_book">Delete</string>
     <string name="action_give_book">Give book</string>
@@ -11,7 +12,7 @@
     <string name="title_activity_main">Books</string>
     <string name="title_activity_users">Users</string>
     <string name="title_activity_add_book">Add Book</string>
-    <string name="title_activity_book_details">Details of Book</string>
+    <string name="title_activity_book_details">Details of %1$s</string>
 
     <string name="title_section_books">Books</string>
     <string name="title_section_users">Users</string>
@@ -39,6 +40,10 @@
     <string name="label_dialog_edit_user_ok_button">OK</string>
     <string name="label_dialog_edit_user_cancel_button">Cancel</string>
 
+    <string name="label_dialog_give_book_title">Give books to %1$s</string>
+    <string name="label_dialog_give_book_ok_button">OK</string>
+    <string name="label_dialog_give_book_cancel_button">Cancel</string>
+
     <string name="label_dialog_add_cover_title">Choose cover:</string>
     <string name="label_dialog_add_book_choice_camera">Take Photo</string>
     <string name="label_dialog_add_book_choice_gallery">Choose from Library</string>
@@ -57,6 +62,11 @@
 
     <string name="label_description_header">Description:</string>
     <string name="label_description_text_empty">No description.</string>
+
+    <string name="label_book_details_title">Title: %1$s</string>
+    <string name="label_book_details_author">Author: %1$s</string>
+    <string name="label_book_details_user_list_header">Users who take this book:</string>
+    <string name="label_book_details_user_list_empty">All books in library</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

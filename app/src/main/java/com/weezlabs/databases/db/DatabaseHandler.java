@@ -1,5 +1,6 @@
 package com.weezlabs.databases.db;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -64,6 +65,15 @@ public class DatabaseHandler extends SQLiteOpenHelper implements BooksDbHandler,
         String SELECT_BOOKS_WITH_AVAILABLE_AMOUNT = "SELECT *, " +
                 Book.TOTAL_AMOUNT + "-" + "(" + SELECT_COUNT_TAKEN_BOOKS + ") AS " + Book.AMOUNT_ALIAS + " " +
                 "FROM " + Book.TABLE;
+        String SELECT_AVAILABLE_BOOKS = SELECT_BOOKS_WITH_AVAILABLE_AMOUNT + " " +
+                "WHERE " + Book.AMOUNT_ALIAS + ">0";
+        String SELECT_USERS_WHO_TAKE_BOOK = "SELECT " +
+                User.TABLE + "." + User.ID + ", " + User.TABLE + "." + User.USER_NAME + " " +
+                "FROM " + User.TABLE + " " +
+                "INNER JOIN " + UserBookLink.TABLE + " ON " +
+                User.TABLE + "." + User.ID + "=" + UserBookLink.TABLE + "." + UserBookLink.USER_ID + " " +
+                "WHERE " + UserBookLink.TABLE + "." + UserBookLink.BOOK_ID + "=?" + " " +
+                "GROUP BY " + User.TABLE + "." + User.ID;
     }
 
     public DatabaseHandler(Context context) {
@@ -161,9 +171,9 @@ public class DatabaseHandler extends SQLiteOpenHelper implements BooksDbHandler,
 
     @Override
     public int deleteBook(Book book) {
-        // TODO: delete book id from table of links
         SQLiteDatabase db = getWritableDatabase();
         int countRows = db.delete(Book.TABLE, Book.ID + "=?", new String[]{String.valueOf(book.getId())});
+        db.delete(UserBookLink.TABLE, UserBookLink.BOOK_ID + "=?", new String[]{String.valueOf(book.getId())});
         db.close();
         return countRows;
     }
@@ -175,19 +185,14 @@ public class DatabaseHandler extends SQLiteOpenHelper implements BooksDbHandler,
 
     @Override
     public Cursor getAvailableBooks() {
-        return null;
+        SQLiteDatabase db = getReadableDatabase();
+        return db.rawQuery(Queries.SELECT_AVAILABLE_BOOKS, null);
     }
 
     @Override
     public Cursor getBooksWithAvailableAmount() {
         SQLiteDatabase db = getReadableDatabase();
         return db.rawQuery(Queries.SELECT_BOOKS_WITH_AVAILABLE_AMOUNT, null);
-    }
-
-    @Override
-    public Cursor getUsersWhoTakeBook(int bookId) {
-        // TODO: implement select from users table using links table
-        return null;
     }
 
     // UserDbHandler implementation
@@ -235,11 +240,36 @@ public class DatabaseHandler extends SQLiteOpenHelper implements BooksDbHandler,
 
     @Override
     public int deleteUser(User user) {
-        // TODO: delete user id from table of links
         SQLiteDatabase db = getWritableDatabase();
         int countRows = db.delete(User.TABLE, User.ID + "=?", new String[]{String.valueOf(user.getId())});
+        db.delete(UserBookLink.TABLE, UserBookLink.USER_ID + "=?", new String[]{String.valueOf(user.getId())});
         db.close();
         return countRows;
+    }
+
+    @Override
+    public void giveBooksToUser(List<Integer> bookIdList, int userId) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            db.beginTransaction();
+            ContentValues values = new ContentValues();
+            for (Integer id : bookIdList) {
+                values.clear();
+                values.put(UserBookLink.USER_ID, userId);
+                values.put(UserBookLink.BOOK_ID, id);
+                db.insert(UserBookLink.TABLE, null, values);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+        db.close();
+    }
+
+    @Override
+    public Cursor getUsersWhoTakeBook(int bookId) {
+        SQLiteDatabase db = getReadableDatabase();
+        return db.rawQuery(Queries.SELECT_USERS_WHO_TAKE_BOOK, new String[]{String.valueOf(bookId)});
     }
 
     private void closeCursor(Cursor cursor) {

@@ -3,7 +3,6 @@ package com.weezlabs.databases;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
@@ -23,7 +22,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
-import com.weezlabs.databases.db.DatabaseHandler;
 import com.weezlabs.databases.model.Book;
 import com.weezlabs.databases.task.DeleteBookTask;
 import com.weezlabs.databases.task.OnTaskCompletedListener;
@@ -33,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         OnTaskCompletedListener {
     private static final int BOOKS_LOADER = 15052015;
     private static final int REQUEST_BOOK_ACTIVITY = 113;
+    private static final int REQUEST_USERS_ACTIVITY = 331;
 
     private BookCursorAdapter mBookCursorAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -80,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     public boolean onMenuItemClick(MenuItem item) {
                         int id = item.getItemId();
                         switch (id) {
+                            case R.id.action_book_details:
+                                startBookDetailsActivity(book);
+                                break;
                             case R.id.action_edit_book:
                                 startBookActivity(book);
                                 break;
@@ -169,7 +171,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_BOOK_ACTIVITY && resultCode == RESULT_OK) {
+        if ((requestCode == REQUEST_BOOK_ACTIVITY || requestCode == REQUEST_USERS_ACTIVITY)
+                && resultCode == RESULT_OK) {
             loadBookCursor();
         }
     }
@@ -240,9 +243,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         startActivityForResult(intent, REQUEST_BOOK_ACTIVITY);
     }
 
+    private void startBookDetailsActivity(Book book) {
+        Intent intent = new Intent(getApplicationContext(), BookDetailsActivity.class);
+        if (book != null) {
+            intent.putExtra(BookActivity.BOOK_KEY, book);
+        }
+        startActivity(intent);
+    }
+
     private void startUsersActivity() {
         Intent intent = new Intent(getApplicationContext(), UsersActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_USERS_ACTIVITY);
     }
 
     private void loadBookCursor() {
@@ -296,12 +307,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     /**
      * Created by Andrey Bondarenko on 08.05.15.
      */
-    public static class BookCursorLoader extends CursorLoader {
-        DatabaseHandler mDatabaseHandler;
+    public static class BookCursorLoader extends BaseCursorLoader {
 
         public BookCursorLoader(Context context) {
             super(context);
-            mDatabaseHandler = new DatabaseHandler(context.getApplicationContext());
         }
 
         @Override
