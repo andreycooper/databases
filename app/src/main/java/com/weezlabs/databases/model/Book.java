@@ -19,6 +19,8 @@ public class Book implements Parcelable {
     public static final String TOTAL_AMOUNT = "total_amount";
     public static final String AMOUNT_ALIAS = "remain_amount";
 
+    public static final String[] PROJECTION_ALL = {ID, AUTHOR, TITLE, COVER_PATH, DESCRIPTION, TOTAL_AMOUNT, AMOUNT_ALIAS};
+
     private int mId;
     private String mAuthor;
     private String mTitle;
@@ -59,6 +61,10 @@ public class Book implements Parcelable {
         book.setDescription(cursor.getString(cursor.getColumnIndex(DESCRIPTION)));
         book.setTotalAmount(cursor.getInt(cursor.getColumnIndex(TOTAL_AMOUNT)));
         return book;
+    }
+
+    public static String getTableColumn(String column) {
+        return Book.TABLE + "." + column;
     }
 
     public int getId() {
@@ -156,35 +162,35 @@ public class Book implements Parcelable {
         }
     };
 
-    public static final class ValuesBuilder {
+    public static final class Builder {
         private final ContentValues values = new ContentValues();
 
-        public ValuesBuilder id(int id) {
+        public Builder id(int id) {
             values.put(ID, id);
             return this;
         }
 
-        public ValuesBuilder author(String author) {
+        public Builder author(String author) {
             values.put(AUTHOR, author);
             return this;
         }
 
-        public ValuesBuilder title(String title) {
+        public Builder title(String title) {
             values.put(TITLE, title);
             return this;
         }
 
-        public ValuesBuilder coverPath(String coverPath) {
+        public Builder coverPath(String coverPath) {
             values.put(COVER_PATH, coverPath);
             return this;
         }
 
-        public ValuesBuilder description(String description) {
+        public Builder description(String description) {
             values.put(DESCRIPTION, description);
             return this;
         }
 
-        public ValuesBuilder totalAmount(int totalAmount) {
+        public Builder totalAmount(int totalAmount) {
             values.put(TOTAL_AMOUNT, totalAmount);
             return this;
         }

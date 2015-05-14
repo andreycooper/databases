@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.weezlabs.databases.model.Book;
 import com.weezlabs.databases.model.User;
+import com.weezlabs.databases.model.UserBookLink;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,13 +49,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements BooksDbHandler,
             "DROP TABLE IF EXISTS " + User.TABLE;
     private static final String UPGRADE_TABLE_USER_BOOK_LINKS = "" +
             "DROP TABLE IF EXISTS " + UserBookLink.TABLE;
-
-    public interface UserBookLink {
-        String TABLE = "user_book";
-        String ID = "_id";
-        String USER_ID = "user_id";
-        String BOOK_ID = "book_id";
-    }
 
     public interface Queries {
         String SELECT_ALL_BOOKS = "SELECT * FROM " + Book.TABLE;
@@ -100,7 +94,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements BooksDbHandler,
     public long addBook(Book book) {
         long rowId;
         SQLiteDatabase db = this.getWritableDatabase();
-        rowId = db.insert(Book.TABLE, null, new Book.ValuesBuilder()
+        rowId = db.insert(Book.TABLE, null, new Book.Builder()
                 .author(book.getAuthor())
                 .title(book.getTitle())
                 .coverPath(book.getCoverPath())
@@ -157,7 +151,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements BooksDbHandler,
     @Override
     public int updateBook(Book book) {
         SQLiteDatabase db = getWritableDatabase();
-        int countRows = db.update(Book.TABLE, new Book.ValuesBuilder()
+        int countRows = db.update(Book.TABLE, new Book.Builder()
                 .author(book.getAuthor())
                 .title(book.getTitle())
                 .coverPath(book.getCoverPath())
@@ -215,7 +209,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements BooksDbHandler,
     @Override
     public long addUser(User user) {
         SQLiteDatabase db = getWritableDatabase();
-        long rowId = db.insert(User.TABLE, null, new User.ValuesBuilder()
+        long rowId = db.insert(User.TABLE, null, new User.Builder()
                 .userName(user.getName())
                 .build());
         db.close();
@@ -231,7 +225,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements BooksDbHandler,
     @Override
     public int updateUser(User user) {
         SQLiteDatabase db = getWritableDatabase();
-        int countRows = db.update(User.TABLE, new User.ValuesBuilder()
+        int countRows = db.update(User.TABLE, new User.Builder()
                 .userName(user.getName())
                 .build(), User.ID + "=?", new String[]{String.valueOf(user.getId())});
         db.close();

@@ -3,6 +3,7 @@ package com.weezlabs.databases;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                 startBookActivity(book);
                                 break;
                             case R.id.action_delete_book:
+                                // TODO: getContentResolver.delete()
                                 DeleteBookTask deleteBookTask =
                                         new DeleteBookTask(getApplicationContext(), getTaskCompletedListener());
                                 deleteBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, book);
@@ -270,7 +272,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
             case BOOKS_LOADER:
-                return new BookCursorLoader(this);
+                return new CursorLoader(this, BookCatalogProvider.buildBooksWithCountUri(),
+                        Book.PROJECTION_ALL, null, null, null);
             default:
                 // An invalid id was passed in
                 return null;

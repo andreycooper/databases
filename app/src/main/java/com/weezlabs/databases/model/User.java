@@ -12,6 +12,8 @@ public class User {
     public static final String ID = "_id";
     public static final String USER_NAME = "user_name";
 
+    public static final String[] PROJECTION_ALL = {ID, USER_NAME};
+
     private int mId;
     private String mName;
 
@@ -28,6 +30,10 @@ public class User {
         user.setId(cursor.getInt(cursor.getColumnIndex(ID)));
         user.setName(cursor.getString(cursor.getColumnIndex(USER_NAME)));
         return user;
+    }
+
+    public static String getTableColumn(String column) {
+        return User.TABLE + "." + column;
     }
 
     public int getId() {
@@ -55,15 +61,15 @@ public class User {
         return sb.toString();
     }
 
-    public static final class ValuesBuilder {
+    public static final class Builder {
         private final ContentValues values = new ContentValues();
 
-        public ValuesBuilder id(int id) {
+        public Builder id(int id) {
             values.put(ID, id);
             return this;
         }
 
-        public ValuesBuilder userName(String userName) {
+        public Builder userName(String userName) {
             values.put(USER_NAME, userName);
             return this;
         }
