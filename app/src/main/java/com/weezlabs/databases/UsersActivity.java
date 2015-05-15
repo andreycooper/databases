@@ -2,17 +2,21 @@ package com.weezlabs.databases;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.Context;
+import android.content.ContentProviderOperation;
+import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,23 +25,19 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.weezlabs.databases.db.DatabaseHandler;
 import com.weezlabs.databases.model.Book;
 import com.weezlabs.databases.model.User;
-import com.weezlabs.databases.task.BaseUserTask;
-import com.weezlabs.databases.task.DeleteUserTask;
-import com.weezlabs.databases.task.InsertOrUpdateUserTask;
-import com.weezlabs.databases.task.OnTaskCompletedListener;
+import com.weezlabs.databases.model.UserBookLink;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class UsersActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
-        OnTaskCompletedListener {
+public class UsersActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int USERS_LOADER = 18032015;
     private static final int AVAILABLE_BOOKS_LOADER = 15092010;
     private static final int INCORRECT_ID = -1;
+    private static final String LOG_TAG = UsersActivity.class.getSimpleName();
 
     private UserCursorAdapter mUserCursorAdapter;
     private User mUser;
@@ -53,10 +53,10 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         }
 
         mUserCursorAdapter = new UserCursorAdapter(this, null, true, R.layout.user_row);
+        getLoaderManager().initLoader(USERS_LOADER, null, this);
 
         initListView();
 
-        getLoaderManager().initLoader(USERS_LOADER, null, this);
     }
 
     private void initListView() {
@@ -83,7 +83,8 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
                                 showAddUserDialog(user);
                                 break;
                             case R.id.action_delete_user:
-                                executeUserTask(new DeleteUserTask(getActivity(), getTaskCompletedListener()), user);
+                                getContentResolver().delete(BookCatalogProvider.buildUserIdUri(user.getId()), null, null);
+                                onTaskCompleted();
                                 break;
                             default:
                                 break;
@@ -127,10 +128,6 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         return this;
     }
 
-    private OnTaskCompletedListener getTaskCompletedListener() {
-        return this;
-    }
-
     private void showAddUserDialog(final User user) {
         AlertDialog.Builder builder =
                 new AlertDialog.Builder(this, R.style.Base_Theme_AppCompat_Light_Dialog_Alert);
@@ -155,12 +152,15 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
                 if (isNewUser) {
                     User user = new User();
                     user.setName(materialEdit.getText().toString());
-                    executeUserTask(new InsertOrUpdateUserTask(getApplicationContext(),
-                            getTaskCompletedListener(), false), user);
+                    ContentValues values = new User.Builder().userName(user.getName()).build();
+                    getContentResolver().insert(BookCatalogProvider.USERS_CONTENT_URI, values);
+                    onTaskCompleted();
                 } else {
                     user.setName(materialEdit.getText().toString());
-                    executeUserTask(new InsertOrUpdateUserTask(getApplicationContext(),
-                            getTaskCompletedListener(), true), user);
+                    ContentValues values = new User.Builder().userName(user.getName()).build();
+                    getContentResolver().update(BookCatalogProvider.buildUserIdUri(user.getId()),
+                            values, null, null);
+                    onTaskCompleted();
                 }
 
                 dialog.dismiss();
@@ -206,9 +206,24 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         builder.setPositiveButton(R.string.label_dialog_give_book_ok_button, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                GiveBooksTask task = new GiveBooksTask(getActivity().getApplicationContext(),
-                        bookIdList, mUser.getId());
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                // TODO: apply batch
+                ContentValues values = new ContentValues();
+                ArrayList<ContentProviderOperation> operationList = new ArrayList<>();
+                for (Integer bookId : bookIdList) {
+                    values.clear();
+                    values = new UserBookLink.Builder().bookId(bookId).userId(mUser.getId()).build();
+                    operationList.add(ContentProviderOperation.newInsert(BookCatalogProvider.buildGiveBookToUserUri())
+                            .withValues(values).withYieldAllowed(true).build());
+                }
+                try {
+                    getContentResolver().applyBatch(BookCatalogProvider.AUTHORITY, operationList);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    Log.e(LOG_TAG, "Remote exception!");
+                } catch (OperationApplicationException e) {
+                    e.printStackTrace();
+                    Log.e(LOG_TAG, "can't give books to " + mUser.getName());
+                }
                 setResultToOk();
                 dialog.dismiss();
             }
@@ -241,11 +256,6 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         return labels;
     }
 
-
-    private void executeUserTask(BaseUserTask userTask, User... params) {
-        userTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
-    }
-
     private void useLoader(int loaderId) {
         Loader<Cursor> loader = getLoaderManager().getLoader(loaderId);
         if (loader == null) {
@@ -260,9 +270,11 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case USERS_LOADER:
-                return new UserCursorLoader(this);
+                return new CursorLoader(this, BookCatalogProvider.USERS_CONTENT_URI,
+                        User.PROJECTION_ALL, null, null, null);
             case AVAILABLE_BOOKS_LOADER:
-                return new AvailableBookCursorLoader(this);
+                return new CursorLoader(this, BookCatalogProvider.buildAvailableBooksUri(),
+                        Book.PROJECTION_ALL, null, null, null);
             default:
                 // An invalid id was passed in
                 return null;
@@ -297,51 +309,9 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         }
     }
 
-    @Override
     public void onTaskCompleted() {
         setResultToOk();
         useLoader(USERS_LOADER);
     }
 
-    private static class UserCursorLoader extends BaseCursorLoader {
-
-        public UserCursorLoader(Context context) {
-            super(context);
-        }
-
-        @Override
-        public Cursor loadInBackground() {
-            return mDatabaseHandler.getUsersCursor();
-        }
-    }
-
-    private static class AvailableBookCursorLoader extends BaseCursorLoader {
-
-        public AvailableBookCursorLoader(Context context) {
-            super(context);
-        }
-
-        @Override
-        public Cursor loadInBackground() {
-            return mDatabaseHandler.getAvailableBooks();
-        }
-    }
-
-    private static class GiveBooksTask extends AsyncTask<Void, Void, Void> {
-        DatabaseHandler mDatabaseHandler;
-        List<Integer> mBookIdList;
-        int mUserId;
-
-        public GiveBooksTask(Context context, List<Integer> bookIdList, int userId) {
-            mDatabaseHandler = new DatabaseHandler(context.getApplicationContext());
-            mBookIdList = bookIdList;
-            mUserId = userId;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            mDatabaseHandler.giveBooksToUser(mBookIdList, mUserId);
-            return null;
-        }
-    }
 }

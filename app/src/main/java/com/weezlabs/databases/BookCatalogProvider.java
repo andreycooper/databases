@@ -15,8 +15,9 @@ import com.weezlabs.databases.model.User;
 import com.weezlabs.databases.model.UserBookLink;
 
 public class BookCatalogProvider extends ContentProvider {
-    private static final String AUTHORITY = "com.weezlabs.databases.provider";
+    public static final String AUTHORITY = "com.weezlabs.databases.provider";
     private static final String SCHEME = "content://";
+    private static final String UNKNOWN_URI = "Unknown URI";
 
     private static final String BOOKS_PATH = "books";
     private static final String COUNT_PATH = "count";
@@ -81,7 +82,7 @@ public class BookCatalogProvider extends ContentProvider {
         return USERS_CONTENT_URI.buildUpon().appendPath(String.valueOf(userId)).build();
     }
 
-    public static Uri builsUsersWithBookUri(int bookId) {
+    public static Uri buildUsersWithBookUri(int bookId) {
         return USERS_CONTENT_URI.buildUpon()
                 .appendPath(BOOKS_PATH)
                 .appendPath(String.valueOf(bookId)).build();
@@ -124,8 +125,9 @@ public class BookCatalogProvider extends ContentProvider {
                 rowId = mDbHandler.getWritableDatabase().insert(UserBookLink.TABLE, null, values);
                 resultUri = ContentUris.withAppendedId(uri, rowId);
                 getContext().getContentResolver().notifyChange(resultUri, null);
+                break;
             default:
-                throw new IllegalArgumentException("Unknown URI");
+                throw new IllegalArgumentException(UNKNOWN_URI);
         }
         return resultUri;
     }
@@ -136,6 +138,14 @@ public class BookCatalogProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         int count;
         switch (match) {
+            case BOOKS:
+                count = mDbHandler.getWritableDatabase().update(Book.TABLE, values, selection, selectionArgs);
+                getContext().getContentResolver().notifyChange(uri, null);
+                break;
+            case USERS:
+                count = mDbHandler.getWritableDatabase().update(User.TABLE, values, selection, selectionArgs);
+                getContext().getContentResolver().notifyChange(uri, null);
+                break;
             case BOOK_ID:
                 selection = getBookSelection(uri, selection);
                 count = mDbHandler.getWritableDatabase().update(Book.TABLE, values, selection, selectionArgs);
@@ -147,7 +157,7 @@ public class BookCatalogProvider extends ContentProvider {
                 getContext().getContentResolver().notifyChange(uri, null);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown URI");
+                throw new IllegalArgumentException(UNKNOWN_URI);
         }
         return count;
     }
@@ -155,22 +165,31 @@ public class BookCatalogProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         final int match = sUriMatcher.match(uri);
-        int countRows = 0;
+        int countRows;
         switch (match) {
             case BOOK_ID:
                 selection = getBookSelection(uri, selection);
                 countRows = mDbHandler.getWritableDatabase().delete(Book.TABLE, selection, selectionArgs);
                 mDbHandler.getWritableDatabase().delete(UserBookLink.TABLE, selection, selectionArgs);
+                // clean table of links
+                String bookId = uri.getLastPathSegment();
+                mDbHandler.getWritableDatabase().delete(UserBookLink.TABLE,
+                        UserBookLink.BOOK_ID + "=" + bookId, selectionArgs);
+
                 getContext().getContentResolver().notifyChange(uri, null);
                 break;
             case USER_ID:
                 selection = getUserSelection(uri, selection);
                 countRows = mDbHandler.getWritableDatabase().delete(User.TABLE, selection, selectionArgs);
-                mDbHandler.getWritableDatabase().delete(UserBookLink.TABLE, selection, selectionArgs);
+                // clean table of links
+                String userId = uri.getLastPathSegment();
+                mDbHandler.getWritableDatabase().delete(UserBookLink.TABLE,
+                        UserBookLink.USER_ID + "=" + userId, selectionArgs);
+
                 getContext().getContentResolver().notifyChange(uri, null);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown URI");
+                throw new IllegalArgumentException(UNKNOWN_URI);
         }
         return countRows;
     }
@@ -213,11 +232,11 @@ public class BookCatalogProvider extends ContentProvider {
                 groupByString = User.getTableColumn(User.ID);
                 queryBuilder.setTables(User.TABLE + " INNER JOIN " + UserBookLink.TABLE
                         + " ON " + User.getTableColumn(User.ID)
-                        + " = " + UserBookLink.getTableColumn(UserBookLink.USER_ID));
-                queryBuilder.appendWhere(UserBookLink.getTableColumn(UserBookLink.BOOK_ID) + "=" + bookId);
+                        + "=" + UserBookLink.getTableColumn(UserBookLink.USER_ID));
+                queryBuilder.appendWhere(UserBookLink.getTableColumn(UserBookLink.BOOK_ID) + " = " + bookId);
                 break;
             default:
-                throw new IllegalArgumentException("Unknown URI");
+                throw new IllegalArgumentException(UNKNOWN_URI);
 
         }
 
@@ -240,21 +259,21 @@ public class BookCatalogProvider extends ContentProvider {
     }
 
     private String getBookSelection(Uri uri, String selection) {
-        String id = uri.getLastPathSegment();
+        String bookId = uri.getLastPathSegment();
         if (TextUtils.isEmpty(selection)) {
-            selection = Book.ID + "=" + id;
+            selection = Book.ID + "=" + bookId;
         } else {
-            selection = selection + " AND " + Book.ID + "=" + id;
+            selection = selection + " AND " + Book.ID + "=" + bookId;
         }
         return selection;
     }
 
     private String getUserSelection(Uri uri, String selection) {
-        String id = uri.getLastPathSegment();
+        String userId = uri.getLastPathSegment();
         if (TextUtils.isEmpty(selection)) {
-            selection = User.ID + "=" + id;
+            selection = User.ID + "=" + userId;
         } else {
-            selection = selection + " AND " + User.ID + "=" + id;
+            selection = selection + " AND " + User.ID + "=" + userId;
         }
         return selection;
     }

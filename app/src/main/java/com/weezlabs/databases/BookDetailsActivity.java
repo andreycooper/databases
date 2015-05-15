@@ -1,7 +1,6 @@
 package com.weezlabs.databases;
 
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -16,8 +15,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
-import com.weezlabs.databases.db.DatabaseHandler;
 import com.weezlabs.databases.model.Book;
+import com.weezlabs.databases.model.User;
 
 
 public class BookDetailsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -102,7 +101,8 @@ public class BookDetailsActivity extends AppCompatActivity implements LoaderMana
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case USER_WHO_TAKE_BOOK_LOADER:
-                return new UsersTakeBookCursorLoader(this, mBook.getId());
+                return new CursorLoader(this, BookCatalogProvider.buildUsersWithBookUri(mBook.getId()),
+                        User.PROJECTION_ALL, null, null, null);
             default:
                 // An invalid id was passed in
                 return null;
@@ -131,19 +131,4 @@ public class BookDetailsActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
-    private static class UsersTakeBookCursorLoader extends CursorLoader {
-        DatabaseHandler mDatabaseHandler;
-        int mBookId;
-
-        public UsersTakeBookCursorLoader(Context context, int bookId) {
-            super(context.getApplicationContext());
-            mDatabaseHandler = new DatabaseHandler(context.getApplicationContext());
-            mBookId = bookId;
-        }
-
-        @Override
-        public Cursor loadInBackground() {
-            return mDatabaseHandler.getUsersWhoTakeBook(mBookId);
-        }
-    }
 }

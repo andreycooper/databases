@@ -2,13 +2,11 @@ package com.weezlabs.databases;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -24,12 +22,9 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 import com.weezlabs.databases.model.Book;
-import com.weezlabs.databases.task.DeleteBookTask;
-import com.weezlabs.databases.task.OnTaskCompletedListener;
 
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
-        OnTaskCompletedListener {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int BOOKS_LOADER = 15052015;
     private static final int REQUEST_BOOK_ACTIVITY = 113;
     private static final int REQUEST_USERS_ACTIVITY = 331;
@@ -87,10 +82,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                 startBookActivity(book);
                                 break;
                             case R.id.action_delete_book:
-                                // TODO: getContentResolver.delete()
-                                DeleteBookTask deleteBookTask =
-                                        new DeleteBookTask(getApplicationContext(), getTaskCompletedListener());
-                                deleteBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, book);
+                                getContentResolver().delete(BookCatalogProvider.buildBookIdUri(book.getId()), null, null);
+                                loadBookCursor();
                                 break;
                             default:
                                 break;
@@ -160,10 +153,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         });
 
-    }
-
-    private OnTaskCompletedListener getTaskCompletedListener() {
-        return this;
     }
 
     private Activity getActivity() {
@@ -302,23 +291,4 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
     }
 
-    @Override
-    public void onTaskCompleted() {
-        loadBookCursor();
-    }
-
-    /**
-     * Created by Andrey Bondarenko on 08.05.15.
-     */
-    public static class BookCursorLoader extends BaseCursorLoader {
-
-        public BookCursorLoader(Context context) {
-            super(context);
-        }
-
-        @Override
-        public Cursor loadInBackground() {
-            return mDatabaseHandler.getBooksWithAvailableAmount();
-        }
-    }
 }

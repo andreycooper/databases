@@ -12,7 +12,7 @@ public class User {
     public static final String ID = "_id";
     public static final String USER_NAME = "user_name";
 
-    public static final String[] PROJECTION_ALL = {ID, USER_NAME};
+    public static final String[] PROJECTION_ALL = {getTableColumn(ID), getTableColumn(USER_NAME)};
 
     private int mId;
     private String mName;

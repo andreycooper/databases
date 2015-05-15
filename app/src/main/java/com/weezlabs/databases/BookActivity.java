@@ -1,10 +1,10 @@
 package com.weezlabs.databases;
 
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.weezlabs.databases.model.Book;
-import com.weezlabs.databases.task.InsertOrUpdateBookTask;
 import com.weezlabs.databases.util.ImageUtil;
 
 import java.io.FileNotFoundException;
@@ -51,7 +50,6 @@ public class BookActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         }
 
         Bundle extra = getIntent().getExtras();
@@ -126,6 +124,7 @@ public class BookActivity extends AppCompatActivity {
                     getString(R.string.toast_title_empty),
                     Toast.LENGTH_SHORT).show();
         } else {
+            // TODO: delete old cover and save new to file with timestamp
             String description = TextUtils.isEmpty(mDescriptionEditText.getText().toString())
                     ? null : mDescriptionEditText.getText().toString();
             String coverPath = null;
@@ -142,16 +141,16 @@ public class BookActivity extends AppCompatActivity {
             }
             if (mBook == null) {
                 mBook = new Book(author, title, coverPath, description, totalAmount);
-                InsertOrUpdateBookTask insertBookTask = new InsertOrUpdateBookTask(this, false);
-                insertBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mBook);
+                ContentValues values = getBookValues();
+                getContentResolver().insert(BookCatalogProvider.BOOKS_CONTENT_URI, values);
             } else {
                 mBook.setAuthor(author);
                 mBook.setTitle(title);
                 mBook.setCoverPath(coverPath);
                 mBook.setDescription(description);
                 mBook.setTotalAmount(totalAmount);
-                InsertOrUpdateBookTask updateBookTask = new InsertOrUpdateBookTask(this, true);
-                updateBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mBook);
+                ContentValues values = getBookValues();
+                getContentResolver().update(BookCatalogProvider.buildBookIdUri(mBook.getId()), values, null, null);
             }
             Intent resultIntent = new Intent();
             setResult(RESULT_OK, resultIntent);
@@ -182,6 +181,16 @@ public class BookActivity extends AppCompatActivity {
             }
         }).create().show();
 
+    }
+
+    private ContentValues getBookValues() {
+        return new Book.Builder()
+                .author(mBook.getAuthor())
+                .title(mBook.getTitle())
+                .coverPath(mBook.getCoverPath())
+                .description(mBook.getDescription())
+                .totalAmount(mBook.getTotalAmount())
+                .build();
     }
 
     private void dispatchPickPhotoIntent() {
