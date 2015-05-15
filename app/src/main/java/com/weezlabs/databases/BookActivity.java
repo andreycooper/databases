@@ -129,7 +129,6 @@ public class BookActivity extends AppCompatActivity {
             String coverPath = null;
             try {
                 if (mCoverBitmap != null) {
-                    // TODO: delete old cover and save new to file with timestamp
                     if (mBook != null) {
                         String oldCoverPath = mBook.getCoverPath();
                         if (!TextUtils.isEmpty(oldCoverPath) && ImageUtil.deleteOldCover(oldCoverPath)) {
@@ -139,10 +138,8 @@ public class BookActivity extends AppCompatActivity {
                     coverPath = ImageUtil.saveBitmapToFile(author, title, mCoverBitmap);
                 }
             } catch (FileNotFoundException e) {
-                // TODO: maybe alert the user?
                 Log.d(LOG_TAG, "File not found: " + e.getMessage());
             } catch (IOException e) {
-                // TODO: maybe alert the user?
                 Log.d(LOG_TAG, "Error accessing file: " + e.getMessage());
             }
             if (mBook == null) {

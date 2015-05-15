@@ -206,7 +206,6 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         builder.setPositiveButton(R.string.label_dialog_give_book_ok_button, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO: apply batch
                 ContentValues values = new ContentValues();
                 ArrayList<ContentProviderOperation> operationList = new ArrayList<>();
                 for (Integer bookId : bookIdList) {
