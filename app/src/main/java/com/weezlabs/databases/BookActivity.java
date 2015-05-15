@@ -129,6 +129,7 @@ public class BookActivity extends AppCompatActivity {
             String coverPath = null;
             try {
                 if (mCoverBitmap != null) {
+                    // delete old cover
                     if (mBook != null) {
                         String oldCoverPath = mBook.getCoverPath();
                         if (!TextUtils.isEmpty(oldCoverPath) && ImageUtil.deleteOldCover(oldCoverPath)) {

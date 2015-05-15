@@ -59,7 +59,6 @@ public class BookCatalogProvider extends ContentProvider {
         matcher.addURI(authority, "users/books/#", USERS_WITH_BOOK_ID);
         matcher.addURI(authority, "users/books/give", GIVE_BOOK_TO_USER);
 
-
         return matcher;
     }
 

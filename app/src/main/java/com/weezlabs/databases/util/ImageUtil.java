@@ -115,7 +115,7 @@ public class ImageUtil {
     }
 
     public static String getTimeStamp() {
-        CharSequence timeStamp = DateFormat.format("dd-MM-yyyy hh:mm:ss", new Date());
+        CharSequence timeStamp = DateFormat.format("dd-MM-yyyy_hh_mm_ss", new Date());
         return timeStamp.toString();
     }
 

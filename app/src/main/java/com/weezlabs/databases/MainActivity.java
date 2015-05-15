@@ -40,10 +40,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
 
         mBookCursorAdapter = new BookCursorAdapter(this, null, true);
+        getLoaderManager().initLoader(BOOKS_LOADER, null, this);
 
         initListView();
-
-        getLoaderManager().initLoader(BOOKS_LOADER, null, this);
 
         initDrawer();
     }
