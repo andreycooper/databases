@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
+import android.text.format.DateFormat;
 
 import com.weezlabs.databases.R;
 
@@ -13,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 
 public class ImageUtil {
@@ -54,18 +56,37 @@ public class ImageUtil {
         return bitmap;
     }
 
+    public static boolean deleteOldCover(String coverPath) {
+        if (!isExternalStorageWritable()) {
+            return false;
+        }
+        File file = new File(coverPath.substring(FILE_BEGIN.length()));
+        return file.exists() && file.delete();
+    }
+
     public static String saveBitmapToFile(String author, String title, Bitmap coverBitmap) throws
             FileNotFoundException, IOException {
         String coverPath = null;
         if (!isExternalStorageWritable()) {
-            return coverPath;
+            return null;
         }
         File folder = new File(Environment.getExternalStorageDirectory(), COVERS_FOLDER);
         File coverFile;
         if (folder.mkdirs() || folder.isDirectory()) {
-            coverFile = new File(folder, author + IMAGE_FILE_NAME_DELIMITER + title + IMAGE_FILE_EXTENSION);
+            String timeStamp = getTimeStamp();
+            coverFile = new File(folder, author
+                    + IMAGE_FILE_NAME_DELIMITER
+                    + title
+                    + IMAGE_FILE_NAME_DELIMITER
+                    + timeStamp
+                    + IMAGE_FILE_EXTENSION);
             if (coverFile.exists() && coverFile.delete()) {
-                coverFile = new File(folder, author + IMAGE_FILE_NAME_DELIMITER + title + IMAGE_FILE_EXTENSION);
+                coverFile = new File(folder, author
+                        + IMAGE_FILE_NAME_DELIMITER
+                        + title
+                        + IMAGE_FILE_NAME_DELIMITER
+                        + timeStamp
+                        + IMAGE_FILE_EXTENSION);
             }
             FileOutputStream outputStream = new FileOutputStream(coverFile);
             coverBitmap.compress(Bitmap.CompressFormat.PNG, COMPRESS_QUALITY, outputStream);
@@ -91,6 +112,11 @@ public class ImageUtil {
             return true;
         }
         return false;
+    }
+
+    public static String getTimeStamp() {
+        CharSequence timeStamp = DateFormat.format("dd-MM-yyyy hh:mm:ss", new Date());
+        return timeStamp.toString();
     }
 
 }

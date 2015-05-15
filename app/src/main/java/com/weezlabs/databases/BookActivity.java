@@ -124,12 +124,18 @@ public class BookActivity extends AppCompatActivity {
                     getString(R.string.toast_title_empty),
                     Toast.LENGTH_SHORT).show();
         } else {
-            // TODO: delete old cover and save new to file with timestamp
             String description = TextUtils.isEmpty(mDescriptionEditText.getText().toString())
                     ? null : mDescriptionEditText.getText().toString();
             String coverPath = null;
             try {
                 if (mCoverBitmap != null) {
+                    // TODO: delete old cover and save new to file with timestamp
+                    if (mBook != null) {
+                        String oldCoverPath = mBook.getCoverPath();
+                        if (!TextUtils.isEmpty(oldCoverPath) && ImageUtil.deleteOldCover(oldCoverPath)) {
+                            Log.d(LOG_TAG, "Cover: " + oldCoverPath + "\n deleted!");
+                        }
+                    }
                     coverPath = ImageUtil.saveBitmapToFile(author, title, mCoverBitmap);
                 }
             } catch (FileNotFoundException e) {
