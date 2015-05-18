@@ -20,8 +20,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.weezlabs.databases.model.Book;
+import com.weezlabs.databases.util.PrefUtil;
 
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -84,6 +86,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                 getContentResolver().delete(BookCatalogProvider.buildBookIdUri(book.getId()), null, null);
                                 loadBookCursor();
                                 break;
+                            case R.id.action_share_book:
+                                // TODO: check twitter
+                                if (!PrefUtil.isAuthenticated(getApplicationContext())) {
+                                    Intent intent = new Intent(getActivity(), TwitterLoginActivity.class);
+                                    startActivity(intent);
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Twitter auth OK", Toast.LENGTH_SHORT).show();
+                                }
                             default:
                                 break;
                         }

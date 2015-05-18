@@ -5,6 +5,6 @@ package com.weezlabs.databases;
  */
 public interface Config {
 
-    String TWEET_API_KEY = "0HYDDjcD5pB78KMxNZns3mTCB";
-    String TWEET_API_SECRET = "JVJ2YsEOKPxpw5qrq7Kmh91Nm1uXSVdAmK9rWiXtKwmUvTXtz1";
+    String TWEET_API_KEY = "Ppm7AJ9R6bwjL9nr1MkGOTADb";
+    String TWEET_API_SECRET = "YXLnByv4X9kUhkvfiXJ5mO632fEEGsXbqKCWcJRYnV8nBXDrsU";
 }

@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by Andrey Bondarenko on 18.05.15.
  */
-public class Tweet {
+public class PostTweetResponse {
     @SerializedName("id_str")
     private String mId;
     @SerializedName("user")
