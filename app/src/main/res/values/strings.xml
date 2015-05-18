@@ -5,6 +5,7 @@
     <string name="action_book_details">Details</string>
     <string name="action_edit_book">Edit</string>
     <string name="action_delete_book">Delete</string>
+    <string name="action_share_book">Share on Twitter</string>
     <string name="action_give_book">Give book</string>
     <string name="action_edit_user">Edit</string>
     <string name="action_delete_user">Delete</string>
@@ -71,5 +72,9 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="title_activity_main_drawer">Navigation</string>
+    <string name="title_activity_twitter_login">TwitterLoginActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

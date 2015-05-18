@@ -15,4 +15,9 @@
         android:orderInCategory="2"
         android:title="@string/action_delete_book"/>
 
+    <item
+        android:id="@+id/action_share_book"
+        android:orderInCategory="3"
+        android:title="@string/action_share_book"/>
+
 </menu>
