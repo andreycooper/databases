@@ -19,7 +19,6 @@ import com.squareup.okhttp.OkHttpClient;
 
 import java.io.IOException;
 
-import oauth.signpost.commonshttp.HttpRequestAdapter;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
@@ -30,7 +29,6 @@ import retrofit.client.Response;
 /**
  * This is a helper class, a {@code retrofit.client.UrlConnectionClient} to use
  * when building your {@code retrofit.RestAdapter}.
- *
  */
 public class SigningOkClient extends OkClient {
 

@@ -21,9 +21,6 @@ import retrofit.client.Request;
 
 public class RetrofitHttpOAuthConsumer extends AbstractOAuthConsumer {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
     public RetrofitHttpOAuthConsumer(String consumerKey, String consumerSecret) {

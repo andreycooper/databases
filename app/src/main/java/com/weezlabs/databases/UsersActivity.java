@@ -132,7 +132,7 @@ public class UsersActivity extends AppCompatActivity implements LoaderManager.Lo
         AlertDialog.Builder builder =
                 new AlertDialog.Builder(this, R.style.Base_Theme_AppCompat_Light_Dialog_Alert);
 
-        View inflatedView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_text, null);
+        View inflatedView = LayoutInflater.from(this).inflate(R.layout.dialog_add_user, null);
         final EditText materialEdit = (EditText) inflatedView.findViewById(R.id.material_edit_text);
 
         final boolean isNewUser = user == null;

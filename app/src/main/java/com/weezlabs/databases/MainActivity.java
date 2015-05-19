@@ -3,6 +3,7 @@ package com.weezlabs.databases;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
@@ -11,19 +12,32 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.weezlabs.databases.model.Book;
+import com.weezlabs.databases.model.PostTweetResponse;
+import com.weezlabs.databases.service.TwitterService;
 import com.weezlabs.databases.util.PrefUtil;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -31,10 +45,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final int REQUEST_BOOK_ACTIVITY = 113;
     private static final int REQUEST_USERS_ACTIVITY = 331;
 
+    private static final int TWEET_MAX_CHARS = 140;
+
     private BookCursorAdapter mBookCursorAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private RelativeLayout mDrawerPlaceHolder;
+    private int mCountCharacters;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +104,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                 loadBookCursor();
                                 break;
                             case R.id.action_share_book:
-                                // TODO: check twitter
                                 if (!PrefUtil.isAuthenticated(getApplicationContext())) {
                                     Intent intent = new Intent(getActivity(), TwitterLoginActivity.class);
                                     startActivity(intent);
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "Twitter auth OK", Toast.LENGTH_SHORT).show();
+                                    showTweetDialog(book);
                                 }
                             default:
                                 break;
@@ -226,6 +242,81 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return super.onOptionsItemSelected(item);
     }
 
+    private void showTweetDialog(Book book) {
+        AlertDialog.Builder builder =
+                new AlertDialog.Builder(this, R.style.Base_Theme_AppCompat_Light_Dialog_Alert);
+        View inflatedView = LayoutInflater.from(this).inflate(R.layout.dialog_post_tweet, null);
+
+        final EditText tweetEdit = (EditText) inflatedView.findViewById(R.id.tweet_edit_text);
+        final TextView tweetCountText = (TextView) inflatedView.findViewById(R.id.tweet_chars_count_text);
+
+        tweetEdit.setFilters(new InputFilter[]{new InputFilter.LengthFilter(TWEET_MAX_CHARS)});
+        tweetEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mCountCharacters = TWEET_MAX_CHARS - tweetEdit.getText().toString().length();
+                tweetCountText.setText(getString(R.string.tweet_characters_left, mCountCharacters));
+            }
+        });
+        tweetEdit.setText(getString(R.string.tweet_message, book.getTitle(), book.getAuthor()));
+        tweetEdit.setSelection(tweetEdit.length());
+
+        builder.setTitle(getString(R.string.title_dialog_tweet));
+        builder.setView(inflatedView);
+        builder.setPositiveButton(R.string.label_dialog_tweet_send, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (mCountCharacters >= 0) {
+                    postTweet(tweetEdit.getText().toString());
+                    dialog.dismiss();
+                } else {
+
+                }
+            }
+        });
+        builder.setNegativeButton(R.string.label_dialog_tweet_cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setCancelable(false);
+        builder.create().show();
+    }
+
+    private void postTweet(String tweet) {
+        TwitterService service = new TwitterService();
+        service.init(PrefUtil.getTwitterToken(getApplicationContext()),
+                PrefUtil.getTwitterTokenSecret(getApplicationContext()));
+
+        // Retrofit request with Callback executes async on THREAD_POOL_EXECUTOR
+        // and Callback executes on UI Thread
+        service.postTweet(tweet, new Callback<PostTweetResponse>() {
+            @Override
+            public void success(PostTweetResponse postTweetResponse, Response response) {
+                Toast.makeText(getApplicationContext(), "Success post tweet with id: "
+                        + postTweetResponse.getId(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Toast.makeText(getApplicationContext(), "Error: "
+                        + error.getResponse().getReason(), Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
+
     public void onAddBookClick(View view) {
         startBookActivity();
     }
@@ -233,7 +324,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private void startBookActivity() {
         startBookActivity(null);
     }
-
 
     private void startBookActivity(Book book) {
         Intent intent = new Intent(getApplicationContext(), BookActivity.class);
