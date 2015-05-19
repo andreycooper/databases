@@ -1,6 +1,5 @@
 package com.weezlabs.databases;
 
-import android.app.AlertDialog;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,39 +11,37 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
-import com.weezlabs.databases.service.RetrofitHttpOAuthConsumer;
+import com.weezlabs.databases.service.OAuthTask;
+import com.weezlabs.databases.service.OnOAuthCallBackListener;
 import com.weezlabs.databases.util.PrefUtil;
 
-import dmax.dialog.SpotsDialog;
 import oauth.signpost.OAuth;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
+import oauth.signpost.basic.DefaultOAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthProvider;
 import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
 import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.exception.OAuthNotAuthorizedException;
 
 
-public class TwitterLoginActivity extends AppCompatActivity {
+public class TwitterLoginActivity extends AppCompatActivity implements OnOAuthCallBackListener {
     private final static String TAG = TwitterLoginActivity.class.getSimpleName();
 
-    private final static String CALLBACK = "oauth://twitter";
-    public static final String REQUEST_TOKEN_ENDPOINT_URL = "https://api.twitter.com/oauth/request_token";
-    public static final String ACCESS_TOKEN_ENDPOINT_URL = "https://api.twitter.com/oauth/access_token";
-    public static final String AUTHORIZATION_WEBSITE_URL = "https://api.twitter.com/oauth/authorize";
+    private static final String CALLBACK_SCHEME = "oauth";
+    private static final String CALLBACK_HOST = "twitter";
+    private static final String CALLBACK_URL = CALLBACK_SCHEME + "://" + CALLBACK_HOST;
+    private static final String REQUEST_TOKEN_ENDPOINT_URL = "https://api.twitter.com/oauth/request_token";
+    private static final String ACCESS_TOKEN_ENDPOINT_URL = "https://api.twitter.com/oauth/access_token";
+    private static final String AUTHORIZATION_WEBSITE_URL = "https://api.twitter.com/oauth/authorize";
 
     private WebView mWebView;
     private String mAuthUrl;
-    private AlertDialog mLoginDialog;
-    private WebViewClient mWebViewClient;
 
     private OAuthProvider mProvider;
     private OAuthConsumer mConsumer;
-    private RelativeLayout mWebViewLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,26 +53,14 @@ public class TwitterLoginActivity extends AppCompatActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        mLoginDialog = new SpotsDialog(this);
-        mWebViewClient = new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.contains(CALLBACK)) {
-                    Uri uri = Uri.parse(url);
-                    onOAuthCallback(uri);
-                    return true;
-                }
-                return super.shouldOverrideUrlLoading(view, url);
-            }
-        };
+        mWebView = new WebView(this);
+        RelativeLayout webViewLayout = (RelativeLayout) findViewById(R.id.webview_layout);
+        webViewLayout.addView(mWebView);
 
-        mWebView = new WebView(getApplicationContext());
-        mWebViewLayout = (RelativeLayout) findViewById(R.id.webview_layout);
-        mWebViewLayout.addView(mWebView);
+        WebViewClient webViewClient = new OAuthWebViewClient(this);
+        mWebView.setWebViewClient(webViewClient);
 
         initTwitter();
-
-        mWebView.setWebViewClient(mWebViewClient);
 
         if (!TextUtils.isEmpty(mAuthUrl)) {
             mWebView.loadUrl(mAuthUrl);
@@ -101,7 +86,7 @@ public class TwitterLoginActivity extends AppCompatActivity {
     }
 
     private void initTwitter() {
-        mConsumer = new RetrofitHttpOAuthConsumer(
+        mConsumer = new DefaultOAuthConsumer(
                 Config.CONSUMER_TWEET_API_KEY,
                 Config.CONSUMER_TWEET_API_SECRET);
 
@@ -110,19 +95,11 @@ public class TwitterLoginActivity extends AppCompatActivity {
                 ACCESS_TOKEN_ENDPOINT_URL,
                 AUTHORIZATION_WEBSITE_URL);
 
-
-        new AsyncTask<Void, Void, Void>() {
-
+        OAuthTask task = new OAuthTask(this) {
             @Override
-            protected void onPreExecute() {
-                mLoginDialog.show();
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-
+            protected Void doInBackground(Void... params) {
                 try {
-                    mAuthUrl = mProvider.retrieveRequestToken(mConsumer, CALLBACK);
+                    mAuthUrl = mProvider.retrieveRequestToken(mConsumer, CALLBACK_URL);
                     Log.d(TAG, "mAuthUrl " + mAuthUrl);
 
                 } catch (final OAuthMessageSignerException e) {
@@ -138,42 +115,26 @@ public class TwitterLoginActivity extends AppCompatActivity {
                     showErrorToUser(e);
                     e.printStackTrace();
                 }
-
                 return null;
             }
 
-            private void showErrorToUser(final OAuthException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(TwitterLoginActivity.this,
-                                getString(R.string.toast_error_login, e.getMessage()), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
             @Override
-            protected void onPostExecute(Void v) {
-                mLoginDialog.dismiss();
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
                 if (!TextUtils.isEmpty(mAuthUrl)) {
                     mWebView.loadUrl(mAuthUrl);
                 }
             }
-        }.execute();
+        };
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void onOAuthCallback(final Uri uri) {
+    @Override
+    public void onOAuthCallback(final Uri uri) {
 
-        new AsyncTask<Void, Void, Void>() {
-
+        OAuthTask task = new OAuthTask(this) {
             @Override
-            protected void onPreExecute() {
-                mLoginDialog.show();
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-
+            protected Void doInBackground(Void... params) {
                 String pinCode = uri.getQueryParameter(OAuth.OAUTH_VERIFIER);
                 try {
                     mProvider.retrieveAccessToken(mConsumer, pinCode);
@@ -200,37 +161,31 @@ public class TwitterLoginActivity extends AppCompatActivity {
                 return null;
             }
 
-            private void showErrorToUser(final OAuthException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(TwitterLoginActivity.this,
-                                getString(R.string.toast_error_login, e.getMessage()), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
             @Override
             protected void onPostExecute(Void aVoid) {
-                mLoginDialog.dismiss();
+                super.onPostExecute(aVoid);
                 finish();
             }
-        }.execute();
-
+        };
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    @Override
-    public void finish() {
-        // prevent leak
-        mWebViewLayout.removeAllViews();
-        if (mWebView != null) {
-            mWebView.clearHistory();
-            mWebView.clearCache(true);
-            mWebView.loadUrl("about:blank");
-            mWebView.pauseTimers();
-            mWebView.setWebViewClient(null);
-            mWebView = null;
+    private static class OAuthWebViewClient extends WebViewClient {
+        OnOAuthCallBackListener mCallBackListener;
+
+        public OAuthWebViewClient(OnOAuthCallBackListener listener) {
+            mCallBackListener = listener;
         }
-        super.finish();
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            Uri uri = Uri.parse(url);
+            if (uri.getScheme().equals(CALLBACK_SCHEME)) {
+                mCallBackListener.onOAuthCallback(uri);
+                return true;
+            }
+            return super.shouldOverrideUrlLoading(view, url);
+        }
     }
+
 }

@@ -47,4 +47,12 @@ public class PrefUtil {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
         return prefs.getString(OAuth.OAUTH_TOKEN_SECRET, null);
     }
+
+    public static void resetTwitterOAuth(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove(OAuth.OAUTH_TOKEN);
+        editor.remove(OAuth.OAUTH_TOKEN_SECRET);
+        editor.apply();
+    }
 }

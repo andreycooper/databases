@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final int REQUEST_USERS_ACTIVITY = 331;
 
     private static final int TWEET_MAX_CHARS = 140;
+    public static final int UNAUTHORIZED_CODE = 401;
 
     private BookCursorAdapter mBookCursorAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -163,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
+                        mDrawerLayout.closeDrawer(mDrawerPlaceHolder);
                         break;
                     case 1:
                         mDrawerLayout.closeDrawer(mDrawerPlaceHolder);
@@ -280,7 +282,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     postTweet(tweetEdit.getText().toString());
                     dialog.dismiss();
                 } else {
-
+                    Toast.makeText(getApplicationContext(), getString(R.string.toast_tweet_too_long),
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -304,15 +307,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         service.postTweet(tweet, new Callback<PostTweetResponse>() {
             @Override
             public void success(PostTweetResponse postTweetResponse, Response response) {
-                Toast.makeText(getApplicationContext(), "Success post tweet with id: "
-                        + postTweetResponse.getId(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.toast_tweet_success,
+                        postTweetResponse.getId()), Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Toast.makeText(getApplicationContext(), "Error: "
-                        + error.getResponse().getReason(), Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(getApplicationContext(), getString(R.string.toast_tweet_failure,
+                        error.getResponse().getReason()), Toast.LENGTH_SHORT).show();
+                if (error.getResponse().getStatus() == UNAUTHORIZED_CODE) {
+                    PrefUtil.resetTwitterOAuth(getApplicationContext());
+                }
             }
         });
     }
