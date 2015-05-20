@@ -84,4 +84,6 @@
     <string name="label_dialog_tweet_send">Send</string>
     <string name="label_dialog_tweet_cancel">Cancel</string>
 
+    <string name="toast_internet_check">Check internet connection!</string>
+
 </resources>

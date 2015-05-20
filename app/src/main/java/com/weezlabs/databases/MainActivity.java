@@ -2,12 +2,14 @@ package com.weezlabs.databases;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -105,11 +107,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                                 loadBookCursor();
                                 break;
                             case R.id.action_share_book:
-                                if (!PrefUtil.isAuthenticated(getApplicationContext())) {
-                                    Intent intent = new Intent(getActivity(), TwitterLoginActivity.class);
-                                    startActivity(intent);
+                                if (isOnline()) {
+                                    if (!PrefUtil.isAuthenticated(getApplicationContext())) {
+                                        Intent intent = new Intent(getActivity(), TwitterLoginActivity.class);
+                                        startActivity(intent);
+                                    } else {
+                                        showTweetDialog(book);
+                                    }
                                 } else {
-                                    showTweetDialog(book);
+                                    Toast.makeText(getApplicationContext(),
+                                            getString(R.string.toast_internet_check), Toast.LENGTH_SHORT).show();
                                 }
                             default:
                                 break;
@@ -320,6 +327,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 }
             }
         });
+    }
+
+    private boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable()
+                && cm.getActiveNetworkInfo().isConnected();
     }
 
     public void onAddBookClick(View view) {
